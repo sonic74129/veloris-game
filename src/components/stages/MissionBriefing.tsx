@@ -40,11 +40,10 @@ export function MissionBriefing({ stage }: Props) {
             brandLine="MIRANDA'S CHALLENGE — MISSION BRIEFING"
             subtitle={stage.subtitle}
           />
-          {/* Miranda voiceover — Chinese: single file; English: line-by-line */}
-          {language === 'zh'
-            ? <SingleFileVoiceoverPlayer voiceover={SCENE0_VOICEOVER_ZH} className="mb-1" />
-            : <VoiceoverPlayer script={SCENE0_SCRIPT} audioBasePath={`audio/scene0/${VOICE_VARIANT}`} className="mb-1" />
-          }
+          {/* Miranda voiceover — Chinese: speech bubble overlay; English: inline line-by-line */}
+          {language !== 'zh' && (
+            <VoiceoverPlayer script={SCENE0_SCRIPT} audioBasePath={`audio/scene0/${VOICE_VARIANT}`} className="mb-1" />
+          )}
 
           <div className="mt-2">
             <ChallengeCard
@@ -89,6 +88,16 @@ export function MissionBriefing({ stage }: Props) {
           )}
         </div>
       </div>
+      {/* Miranda speech bubble — zh only, bottom-left over character */}
+      {language === 'zh' && (
+        <div className="absolute z-[7]" style={{ left: 50, bottom: 115, width: 460 }}>
+          <SingleFileVoiceoverPlayer
+            voiceover={SCENE0_VOICEOVER_ZH}
+            speechBubble
+            defaultSpeaker="MIRANDA"
+          />
+        </div>
+      )}
     </>
   );
 }

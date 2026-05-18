@@ -77,9 +77,9 @@ export function LevelMap() {
         </div>
       </div>
 
-      {/* Speech bubble — voiceover overlay, centered between characters */}
+      {/* Speech bubble — voiceover overlay, left column below header */}
       {language === 'zh' && (
-        <div className="absolute z-[7]" style={{ left: 580, right: 480, bottom: 125 }}>
+        <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble />
         </div>
       )}

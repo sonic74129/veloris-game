@@ -22,8 +22,10 @@ interface Props {
   autoPlay?: boolean;
   onEnded?: () => void;
   className?: string;
-  /** Render as a visual-novel speech bubble panel (LevelMap) */
+  /** Render as a visual-novel speech bubble panel (always visible from mount) */
   speechBubble?: boolean;
+  /** Fallback speaker label when cues have no speaker field (e.g. "MIRANDA") */
+  defaultSpeaker?: string;
 }
 
 type Status = 'idle' | 'playing' | 'ended' | 'blocked' | 'fallback';
@@ -34,6 +36,7 @@ export function SingleFileVoiceoverPlayer({
   onEnded,
   className = '',
   speechBubble = false,
+  defaultSpeaker,
 }: Props) {
   const { src, storageKey, cues } = voiceover;
   const audioRef    = useRef<HTMLAudioElement>(null);
@@ -128,90 +131,99 @@ export function SingleFileVoiceoverPlayer({
 
   const isEmphasis = activeCue?.emphasis ?? false;
 
-  // ── Speech-bubble mode (LevelMap) ─────────────────────────────────────────
+  // ── Speech-bubble mode — always visible from mount ───────────────────────
   if (speechBubble) {
-    const speakerLabel = activeCue?.speaker === 'lily' ? 'LILY' : activeCue?.speaker === 'kinky' ? 'KINKY' : null;
-    const isLily = activeCue?.speaker === 'lily';
+    // Show first cue as preview when audio hasn’t started yet
+    const displayCue  = activeCue ?? (status !== 'ended' ? cues[0] : null);
+    const isPreviewing = !activeCue && status !== 'ended';
+    const dispEmphasis = !isPreviewing && (displayCue?.emphasis ?? false);
+    const speakerKey   = activeCue?.speaker ?? displayCue?.speaker ?? null;
+    const effectiveSpeaker = speakerKey?.toUpperCase() ?? defaultSpeaker?.toUpperCase() ?? null;
+    const isLily = effectiveSpeaker === 'LILY';
+    const speakerColor = isLily
+      ? { color: '#8bc4f0', borderColor: 'rgba(139,196,240,0.5)' }
+      : effectiveSpeaker === 'KINKY'
+      ? { color: '#c9a84c', borderColor: 'rgba(201,168,76,0.5)' }
+      : { color: '#e8d8b4', borderColor: 'rgba(232,216,180,0.4)' };
+
     return (
       <div className={className}>
         <audio ref={audioRef} src={`${import.meta.env.BASE_URL}${src}`} preload="auto" />
-        <AnimatePresence>
-          {status === 'playing' && activeCue && (
-            <motion.div
-              key="bubble"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.22 }}
-              className="frame-corners relative border border-gold-2/60 px-6 py-4"
-              style={{ background: 'linear-gradient(180deg,rgba(10,8,6,0.90) 0%,rgba(16,12,9,0.94) 100%)', backdropFilter: 'blur(14px)' }}
-            >
-              <span className="c-tl" /><span className="c-br" />
-              {/* Speaker name + waveform + skip */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  {speakerLabel && (
-                    <span
-                      className="font-mono text-[9px] tracking-[0.3em] px-2 py-0.5 border"
-                      style={isLily
-                        ? { color: '#8bc4f0', borderColor: 'rgba(139,196,240,0.5)' }
-                        : { color: '#c9a84c', borderColor: 'rgba(201,168,76,0.5)' }
-                      }
-                    >
-                      {speakerLabel}
-                    </span>
-                  )}
-                  <div className="flex items-end gap-[2px] h-[12px]">
-                    {[3, 5, 7, 4, 6].map((h, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-[2px] rounded-full"
-                        style={{ background: isLily ? 'rgba(139,196,240,0.7)' : 'rgba(201,168,76,0.7)', height: h }}
-                        animate={{ height: [h, h * 1.8, h] }}
-                        transition={{ repeat: Infinity, duration: 0.6 + i * 0.1, ease: 'easeInOut' }}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <button
-                  onClick={skip}
-                  className="font-mono text-[9px] tracking-[0.2em] text-warm-4 hover:text-warm-3 transition-colors"
+        <div
+          className="frame-corners relative border border-gold-2/60 px-5 py-4"
+          style={{ background: 'linear-gradient(180deg,rgba(10,8,6,0.90) 0%,rgba(16,12,9,0.94) 100%)', backdropFilter: 'blur(14px)' }}
+        >
+          <span className="c-tl" /><span className="c-br" />
+
+          {/* Header row: speaker label + waveform/dots + right controls */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              {effectiveSpeaker && (
+                <span
+                  className="font-mono text-[9px] tracking-[0.3em] px-2 py-0.5 border"
+                  style={speakerColor}
                 >
-                  SKIP ×
-                </button>
-              </div>
-              {/* Shimmer subtitle */}
-              <span
-                className={
-                  isEmphasis
-                    ? 'font-brand uppercase tracking-[0.2em] text-[22px] subtitle-shimmer-gold block'
-                    : 'font-cn italic text-[19px] tracking-[0.04em] leading-[1.6] subtitle-shimmer block'
-                }
-              >
-                {activeCue.text}
-              </span>
-            </motion.div>
-          )}
-          {status === 'blocked' && (
-            <motion.button key="blocked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={replay}
-              className="flex items-center gap-1.5 px-3 py-1 border border-gold-3/60
-                         text-gold-3 font-mono text-[9px] tracking-[0.22em]
-                         hover:bg-gold-3/10 transition-colors"
+                  {effectiveSpeaker}
+                </span>
+              )}
+              {/* Waveform when live */}
+              {status === 'playing' && activeCue && (
+                <div className="flex items-end gap-[2px] h-[12px]">
+                  {[3, 5, 7, 4, 6].map((h, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-[2px] rounded-full"
+                      style={{ background: isLily ? 'rgba(139,196,240,0.7)' : 'rgba(201,168,76,0.7)', height: h }}
+                      animate={{ height: [h, h * 1.8, h] }}
+                      transition={{ repeat: Infinity, duration: 0.6 + i * 0.1, ease: 'easeInOut' }}
+                    />
+                  ))}
+                </div>
+              )}
+              {/* Pulsing dots while previewing / loading */}
+              {isPreviewing && status !== 'blocked' && (
+                <motion.span
+                  className="font-mono text-[8px] text-warm-4 tracking-widest"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ repeat: Infinity, duration: 1.4 }}
+                >
+                  · · ·
+                </motion.span>
+              )}
+            </div>
+
+            {/* Right controls */}
+            {status === 'playing' && activeCue && (
+              <button onClick={skip} className="font-mono text-[9px] tracking-[0.2em] text-warm-4 hover:text-warm-3 transition-colors">
+                SKIP ×
+              </button>
+            )}
+            {status === 'blocked' && (
+              <button onClick={replay} className="font-mono text-[9px] tracking-[0.22em] text-gold-3 hover:text-gold-4 transition-colors">
+                ▶ PLAY VOICE
+              </button>
+            )}
+            {status === 'ended' && (
+              <button onClick={replay} className="font-mono text-[9px] tracking-[0.2em] text-warm-4 hover:text-warm-3 transition-colors">
+                ↺ REPLAY
+              </button>
+            )}
+          </div>
+
+          {/* Subtitle text */}
+          {displayCue && (
+            <span
+              className={
+                dispEmphasis
+                  ? 'font-brand uppercase tracking-[0.2em] text-[22px] subtitle-shimmer-gold block'
+                  : 'font-cn italic text-[19px] tracking-[0.04em] leading-[1.6] subtitle-shimmer block'
+              }
+              style={isPreviewing ? { opacity: 0.6 } : undefined}
             >
-              ▶ PLAY VOICE
-            </motion.button>
+              {displayCue.text}
+            </span>
           )}
-          {status === 'ended' && (
-            <motion.button key="ended" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={replay}
-              className="flex items-center gap-1.5 font-mono text-[9px] tracking-[0.2em]
-                         text-warm-4 hover:text-warm-3 transition-colors"
-            >
-              ↺ REPLAY VOICE
-            </motion.button>
-          )}
-        </AnimatePresence>
+        </div>
       </div>
     );
   }
