@@ -1,6 +1,7 @@
 // Game data types — shared across stages and language files
 
 export type StageId =
+  | 'title'
   | 'mission'
   | 'map'
   | 'stage1'
@@ -15,6 +16,7 @@ export type AccentColor =
 export type Language = 'zh' | 'en';
 
 export type StageType =
+  | 'title'
   | 'briefing'
   | 'map'
   | 'drag-match'

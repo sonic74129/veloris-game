@@ -1,4 +1,5 @@
 import { GameShell } from './components/layout/GameShell';
+import { TitleScreen } from './components/stages/TitleScreen';
 import { MissionBriefing } from './components/stages/MissionBriefing';
 import { LevelMap } from './components/stages/LevelMap';
 import { DragMatchStage } from './components/stages/DragMatchStage';
@@ -15,6 +16,7 @@ export default function App() {
   const render = () => {
     if (stage.comingSoon) return <ComingSoonStage stage={stage} />;
     switch (stage.type) {
+      case 'title':              return <TitleScreen />;
       case 'briefing':           return <MissionBriefing stage={stage} />;
       case 'map':                return <LevelMap />;
       case 'drag-match':         return <DragMatchStage stage={stage} />;
@@ -24,5 +26,5 @@ export default function App() {
     }
   };
 
-  return <GameShell>{render()}</GameShell>;
+  return <GameShell hideHud={currentStageId === 'title'}>{render()}</GameShell>;
 }

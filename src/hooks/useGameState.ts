@@ -23,16 +23,16 @@ interface GameState {
   hardReset: () => void;
 }
 
-const INITIAL_UNLOCKED: StageId[] = ['mission', 'map', 'stage1'];
+const INITIAL_UNLOCKED: StageId[] = ['title', 'mission', 'map', 'stage1'];
 
 const STAGE_ORDER: StageId[] = [
-  'mission', 'map', 'stage1', 'stage2', 'stage3', 'stage4', 'stage5',
+  'title', 'mission', 'map', 'stage1', 'stage2', 'stage3', 'stage4', 'stage5',
 ];
 
 export const useGameState = create<GameState>()(
   persist(
     (set, get) => ({
-      currentStageId: 'mission',
+      currentStageId: 'title',
       unlockedStages: INITIAL_UNLOCKED,
       completedStages: [],
       slotAssignments: {},
@@ -97,7 +97,7 @@ export const useGameState = create<GameState>()(
       },
 
       hardReset: () => set({
-        currentStageId: 'mission',
+        currentStageId: 'title',
         unlockedStages: INITIAL_UNLOCKED,
         completedStages: [],
         slotAssignments: {},
