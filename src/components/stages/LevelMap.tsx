@@ -6,11 +6,11 @@ import { packs } from '../../data';
 import { useMobile } from '../../lib/mobile';
 
 const MAP_NODES: { id: StageId; title: string; subtitle: string }[] = [
-  { id: 'stage1', title: 'Work IQ',                  subtitle: '解锁企业记忆' },
-  { id: 'stage2', title: 'Fabric IQ / Data Agent',   subtitle: '让资料成为时尚洞察' },
-  { id: 'stage3', title: 'Foundry IQ',               subtitle: '打造品牌专属智慧' },
-  { id: 'stage4', title: 'Hosted Agent',             subtitle: '部署 AI 智能盟团队' },
-  { id: 'stage5', title: 'Defender for AI',          subtitle: '守护时尚企业' },
+  { id: 'stage1', title: 'Agent-Ready Application', subtitle: '现代化关键 Java / .NET 应用，让 Agent 可安全接入' },
+  { id: 'stage2', title: 'Microsoft IQ',            subtitle: '让 Agent 不只接上系统，更懂人、懂业务、懂知识' },
+  { id: 'stage3', title: 'AI-Ready Data',           subtitle: '统一数据底座与业务语义，让 Data Agent 真正变聪明' },
+  { id: 'stage4', title: 'Foundry',                 subtitle: '把分散的 Agent、模型与治理整理成企业级 AI 平台' },
+  { id: 'stage5', title: 'Defender for AI',         subtitle: '保护 Prompt、侦测 AI Runtime 风险、发现跨云 AI 工作负载' },
 ];
 
 export function LevelMap() {
