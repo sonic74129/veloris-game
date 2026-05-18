@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:voice": "node scripts/gen-voiceover.mjs",
+    "gen:voice:aad": "node scripts/gen-voiceover.mjs --aad"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

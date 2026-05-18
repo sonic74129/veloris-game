@@ -3,6 +3,8 @@ import { ChallengeCard } from '../panels/ChallengeCard';
 import { MissionPanel } from '../panels/MissionPanel';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { StageHeader } from '../layout/StageHeader';
+import { VoiceoverPlayer } from '../voiceover/VoiceoverPlayer';
+import { SCENE0_VOICEOVER } from '../../data/voiceovers/scene0';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
@@ -33,6 +35,9 @@ export function MissionBriefing({ stage }: Props) {
             brandLine="MIRANDA'S CHALLENGE — MISSION BRIEFING"
             subtitle={stage.subtitle}
           />
+          {/* Miranda voiceover — auto-plays on first visit */}
+          <VoiceoverPlayer voiceover={SCENE0_VOICEOVER} className="mb-1" />
+
           <div className="mt-2">
             <ChallengeCard
               title={ui.panels.challenge}
