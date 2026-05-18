@@ -3,6 +3,7 @@ import { CharacterLayer } from '../character/CharacterLayer';
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
+import { useMobile } from '../../lib/mobile';
 
 const MAP_NODES: { id: StageId; title: string; subtitle: string }[] = [
   { id: 'stage1', title: 'Work IQ',                  subtitle: '解锁企业记忆' },
@@ -22,14 +23,15 @@ export function LevelMap() {
   const stage = pack.stages.find((s) => s.id === 'map')!;
   const ui = pack.ui;
 
+  const isMobile = useMobile();
   const progress = Math.round((completed.filter((c) => c.startsWith('stage')).length / 5) * 100);
   const nextStage = STAGE_ORDER.find((id) => id.startsWith('stage') && !completed.includes(id)) ?? 'stage1';
 
   return (
     <>
-      <CharacterLayer variant="side" advisors="large" />
+      {!isMobile && <CharacterLayer variant="side" advisors="large" />}
 
-      <div className="absolute left-[340px] top-[100px] right-[60px]">
+      <div className={`absolute top-[100px] right-[60px] ${isMobile ? 'left-[40px]' : 'left-[340px]'}`}>
         <div className="eyebrow">SCENE · 02 · LEVEL MAP</div>
         <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
           {stage.title}
@@ -42,7 +44,10 @@ export function LevelMap() {
         </div>
       </div>
 
-      <div className="absolute right-[60px] top-[260px] w-[260px] flex flex-col gap-3 z-[6]">
+      <div className={`absolute z-[6] ${isMobile
+        ? 'left-[40px] top-[260px] right-[40px] flex gap-4'
+        : 'right-[60px] top-[260px] w-[260px] flex flex-col gap-3'
+      }`}>
         <div className="glass p-4 frame-corners relative">
           <span className="c-tl" /><span className="c-br" />
           <div className="eyebrow mb-2">{ui.mapSide.progress}</div>

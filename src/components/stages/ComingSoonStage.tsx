@@ -2,6 +2,7 @@ import { CharacterLayer } from '../character/CharacterLayer';
 import { StageHeader } from '../layout/StageHeader';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
+import { useMobile } from '../../lib/mobile';
 import { packs } from '../../data';
 
 interface Props { stage: StageConfig }
@@ -10,11 +11,12 @@ export function ComingSoonStage({ stage }: Props) {
   const language = useGameState((s) => s.language);
   const goToStage = useGameState((s) => s.goToStage);
   const ui = packs[language].ui;
+  const isMobile = useMobile();
 
   return (
     <>
-      <CharacterLayer variant="side" advisors="small" />
-      <div className="absolute left-[370px] top-[110px] right-[60px] bottom-[100px] flex flex-col">
+      {!isMobile && <CharacterLayer variant="side" advisors="small" />}
+      <div className={`absolute top-[110px] right-[60px] bottom-[100px] flex flex-col ${isMobile ? 'left-[40px]' : 'left-[370px]'}`}>
         <StageHeader
           eyebrow={`SCENE · 0${stage.stageNumber} · STAGE`}
           title={stage.title}

@@ -10,6 +10,7 @@ import { StageCompleteModal } from '../gameplay/StageCompleteModal';
 import type { StageConfig, StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
+import { useMobile } from '../../lib/mobile';
 
 interface Props { stage: StageConfig; slotsLayout?: 'horizontal' | 'vertical' }
 
@@ -21,6 +22,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
   const completed = useGameState((s) => s.completedStages);
   const ui = packs[language].ui;
 
+  const isMobile = useMobile();
   const [showModal, setShowModal] = useState(false);
   const wasCompleted = completed.includes(stage.id);
 
@@ -43,9 +45,9 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
 
   return (
     <>
-      <CharacterLayer variant="side" advisors="small" />
+      {!isMobile && <CharacterLayer variant="side" advisors="small" />}
 
-      <div className="absolute left-[370px] top-[100px] right-[60px] bottom-[90px] flex gap-6">
+      <div className={`absolute top-[100px] right-[60px] bottom-[90px] flex gap-6 ${isMobile ? 'left-[40px]' : 'left-[370px]'}`}>
         {/* Center column: header + slots + options */}
         <div className="flex-1 flex flex-col gap-5 min-w-0">
           <div className="flex items-end justify-between">

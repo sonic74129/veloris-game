@@ -6,6 +6,7 @@ import { StageHeader } from '../layout/StageHeader';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
+import { useMobile } from '../../lib/mobile';
 
 interface Props { stage: StageConfig }
 
@@ -13,12 +14,13 @@ export function MissionBriefing({ stage }: Props) {
   const language = useGameState((s) => s.language);
   const goToStage = useGameState((s) => s.goToStage);
   const ui = packs[language].ui;
+  const isMobile = useMobile();
 
   return (
     <>
-      <CharacterLayer variant="left-large" />
+      {!isMobile && <CharacterLayer variant="left-large" />}
 
-      <div className="absolute left-[540px] top-[110px] right-[60px] bottom-[100px] flex gap-8">
+      <div className={`absolute top-[110px] right-[60px] bottom-[100px] flex gap-8 ${isMobile ? 'left-[40px]' : 'left-[540px]'}`}>
         {/* Center: header + challenge */}
         <div className="flex-1 flex flex-col gap-5">
           <StageHeader
