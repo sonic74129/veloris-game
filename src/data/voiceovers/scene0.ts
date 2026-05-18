@@ -9,15 +9,17 @@ import type { SingleFileVoiceover } from '../../components/voiceover/SingleFileV
 export const SCENE0_VOICEOVER_ZH: SingleFileVoiceover = {
   src: 'audio/miranda-scene0-zh.mp3',
   storageKey: 'veloris:vo:mission:played',
+  // Timings derived from ffmpeg silencedetect — not guessed.
   cues: [
-    { start: 0.0,  end: 2.3,  text: '嗯，你终于来了，CTO。' },
-    { start: 2.6,  end: 11.8, text: '董事会要速度，业务部门要 Agent，每一个团队都想把 AI 接进自己的系统：客户资料、订单数据、设计资产、供应链流程、财务权限。' },
-    { start: 12.2, end: 14.0, text: '听起来很美，对吗？' },
-    { start: 14.3, end: 17.2, text: '但如果没有边界，这不是未来——这是失控。' },
-    { start: 17.6, end: 20.2, text: '所以今天，你不是来做 Demo 的。' },
-    { start: 20.5, end: 26.5, text: '你是来判断：哪些系统可以连接，哪些流程必须保护，哪些 Agent 必须被治理。' },
-    { start: 26.9, end: 28.2, text: '现在，CTO。' },
-    { start: 28.5, end: 31.4, text: '证明你配得上这个位置。', emphasis: true },
+    { start: 0.15, end: 1.85, text: '嗯，你终于来了，CTO。' },
+    { start: 2.78, end: 7.48, text: '董事会要速度，业务部门要 Agent，每一个团队都想把 AI 接进自己的系统：' },
+    { start: 8.10, end: 12.28, text: '客户资料、订单数据、设计资产、供应链流程、财务权限。' },
+    { start: 13.24, end: 14.44, text: '听起来很美，对吗？' },
+    { start: 15.27, end: 17.91, text: '但如果没有边界，这不是未来——这是失控。' },
+    { start: 18.85, end: 20.57, text: '所以今天，你不是来做 Demo 的。' },
+    { start: 21.44, end: 26.63, text: '你是来判断：哪些系统可以连接，哪些流程必须保护，哪些 Agent 必须被治理。' },
+    { start: 27.61, end: 28.64, text: '现在，CTO。' },
+    { start: 29.50, end: 30.90, text: '证明你配得上这个位置。', emphasis: true },
   ],
 };
 
