@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { StageVoiceover, SubtitleCue } from '../../data/voiceovers/scene0';
+import type { VoiceoverScript, VoiceLine } from '../../lib/voiceover/types';
+import { stripTag } from '../../lib/voiceover/buildSSML';
 
 export interface VoiceoverHandle {
   replay: () => void;
@@ -8,138 +9,156 @@ export interface VoiceoverHandle {
 }
 
 interface Props {
-  voiceover: StageVoiceover;
-  /** Auto-play on first mount; won't auto-play on subsequent visits (uses localStorage). */
+  script: VoiceoverScript;
+  /** Subdirectory under public/ where per-line MP3s live. e.g. "audio/scene0/ava" */
+  audioBasePath: string;
   autoPlay?: boolean;
   onEnded?: () => void;
   className?: string;
 }
 
-type Status = 'idle' | 'playing' | 'paused' | 'ended' | 'blocked' | 'fallback';
+type Status = 'idle' | 'playing' | 'ended' | 'blocked' | 'fallback';
 
 export const VoiceoverPlayer = forwardRef<VoiceoverHandle, Props>(function VoiceoverPlayer(
-  { voiceover, autoPlay = true, onEnded, className = '' },
+  { script, audioBasePath, autoPlay = true, onEnded, className = '' },
   ref,
 ) {
-  const { src, storageKey, cues } = voiceover;
-  const audioRef  = useRef<HTMLAudioElement>(null);
-  const didInit   = useRef(false);
+  const { storageKey, lines } = script;
+  const audioRef    = useRef<HTMLAudioElement>(null);
+  const pauseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lineIdxRef  = useRef(-1);      // current line index (-1 = not started)
+  const didInit     = useRef(false);
 
-  const [status,    setStatus]    = useState<Status>('idle');
-  const [activeCue, setActiveCue] = useState<SubtitleCue | null>(null);
+  const [status,      setStatus]      = useState<Status>('idle');
+  const [activeLine,  setActiveLine]  = useState<VoiceLine | null>(null);
 
-  // ── Cue matching ─────────────────────────────────────────────────────────
-  const syncCue = useCallback((t: number) => {
-    const found = cues.find(c => t >= c.start && t < c.end) ?? null;
-    setActiveCue(prev => (prev?.text === found?.text ? prev : found));
-  }, [cues]);
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const clearPause = () => {
+    if (pauseTimer.current !== null) { clearTimeout(pauseTimer.current); pauseTimer.current = null; }
+  };
 
-  // ── Wire audio events ────────────────────────────────────────────────────
+  // ── Line sequencer ────────────────────────────────────────────────────────
+  const playLine = useCallback((index: number) => {
+    const el = audioRef.current;
+    if (!el) return;
+
+    if (index >= lines.length) {
+      setStatus('ended');
+      setActiveLine(null);
+      lineIdxRef.current = -1;
+      localStorage.setItem(storageKey, '1');
+      onEnded?.();
+      return;
+    }
+
+    const line = lines[index];
+    lineIdxRef.current = index;
+    setActiveLine(line);
+    setStatus('playing');
+
+    el.src = `${import.meta.env.BASE_URL}${audioBasePath}/${line.id}.mp3`;
+    el.load();
+    el.play().catch(() => { if (index === 0) setStatus('blocked'); });
+  }, [lines, audioBasePath, storageKey, onEnded]);
+
+  // ── Wire audio element events ─────────────────────────────────────────────
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
 
-    const onTimeUpdate = () => syncCue(el.currentTime);
-    const onPlay       = () => setStatus('playing');
-    const onPause      = () => setStatus(s => s === 'ended' ? s : 'paused');
-    const onEnded_     = () => {
-      setStatus('ended');
-      setActiveCue(null);
-      localStorage.setItem(storageKey, '1');
-      onEnded?.();
-    };
-    const onError      = () => setStatus('fallback');   // missing file → silent
-    const onCanPlay    = () => {
-      if (!didInit.current && autoPlay) {
-        didInit.current = true;
-        const alreadyPlayed = localStorage.getItem(storageKey) === '1';
-        if (!alreadyPlayed) {
-          el.play().catch(() => setStatus('blocked'));
-        }
-      }
+    const handleEnded = () => {
+      const idx  = lineIdxRef.current;
+      const line = lines[idx];
+      const delay = line?.pauseAfterMs ?? 0;
+      clearPause();
+      pauseTimer.current = setTimeout(() => playLine(idx + 1), delay);
     };
 
-    el.addEventListener('timeupdate', onTimeUpdate);
-    el.addEventListener('play',       onPlay);
-    el.addEventListener('pause',      onPause);
-    el.addEventListener('ended',      onEnded_);
-    el.addEventListener('error',      onError);
-    el.addEventListener('canplay',    onCanPlay);
+    const handleError = () => {
+      // First line fails → silent fallback; subsequent lines → skip
+      if (lineIdxRef.current <= 0) { setStatus('fallback'); return; }
+      const idx  = lineIdxRef.current;
+      const line = lines[idx];
+      pauseTimer.current = setTimeout(() => playLine(idx + 1), line?.pauseAfterMs ?? 0);
+    };
+
+    const handleCanPlay = () => {
+      if (didInit.current || !autoPlay) return;
+      didInit.current = true;
+      if (localStorage.getItem(storageKey) !== '1') playLine(0);
+    };
+
+    el.addEventListener('ended',   handleEnded);
+    el.addEventListener('error',   handleError);
+    el.addEventListener('canplay', handleCanPlay);
 
     return () => {
-      el.removeEventListener('timeupdate', onTimeUpdate);
-      el.removeEventListener('play',       onPlay);
-      el.removeEventListener('pause',      onPause);
-      el.removeEventListener('ended',      onEnded_);
-      el.removeEventListener('error',      onError);
-      el.removeEventListener('canplay',    onCanPlay);
+      el.removeEventListener('ended',   handleEnded);
+      el.removeEventListener('error',   handleError);
+      el.removeEventListener('canplay', handleCanPlay);
+      clearPause();
     };
-  }, [autoPlay, onEnded, storageKey, syncCue]);
+  }, [autoPlay, lines, playLine, storageKey]);
 
-  // ── Imperative handle for parent-driven replay / skip ───────────────────
+  // ── Imperative handle ────────────────────────────────────────────────────
   const replay = useCallback(() => {
-    const el = audioRef.current;
-    if (!el || status === 'fallback') return;
-    el.currentTime = 0;
-    el.play().catch(() => setStatus('blocked'));
-  }, [status]);
+    if (status === 'fallback') return;
+    clearPause();
+    lineIdxRef.current = -1;
+    localStorage.removeItem(storageKey);
+    playLine(0);
+  }, [status, storageKey, playLine]);
 
   const skip = useCallback(() => {
     const el = audioRef.current;
-    if (el) { el.pause(); el.currentTime = el.duration || 0; }
+    clearPause();
+    if (el) { el.pause(); el.src = ''; }
+    lineIdxRef.current = -1;
     setStatus('ended');
-    setActiveCue(null);
+    setActiveLine(null);
     localStorage.setItem(storageKey, '1');
     onEnded?.();
-  }, [onEnded, storageKey]);
+  }, [storageKey, onEnded]);
 
   useImperativeHandle(ref, () => ({ replay, skip }), [replay, skip]);
 
-  // ── Fallback: audio missing / browser blocked ────────────────────────────
-  const isFallback = status === 'fallback';
+  if (status === 'fallback') return null;
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  const displayText = activeLine ? stripTag(activeLine.text) : '';
+  const isEmphasis  = activeLine?.emphasis ?? false;
+
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {/* Hidden audio element */}
-      {!isFallback && (
-        <audio
-          ref={audioRef}
-          src={`${import.meta.env.BASE_URL}${src}`}
-          preload="auto"
-        />
-      )}
+      {/* Single shared audio element — src swapped per line */}
+      <audio ref={audioRef} preload="none" />
 
-      {/* ── Subtitle bar ─────────────────────────────────────────────────── */}
-      <div className="min-h-[28px] flex items-center justify-start">
+      {/* ── Subtitle ────────────────────────────────────────────────────── */}
+      <div className="min-h-[32px] flex items-center">
         <AnimatePresence mode="wait">
-          {(status === 'playing' || status === 'paused') && activeCue && (
+          {status === 'playing' && activeLine && (
             <motion.div
-              key={activeCue.text}
-              initial={{ opacity: 0, y: 5 }}
+              key={activeLine.id}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18 }}
               className={
-                activeCue.highlight
-                  ? 'font-brand text-[19px] tracking-[0.18em] text-gold-4 uppercase'
+                isEmphasis
+                  ? 'font-brand uppercase tracking-[0.2em] text-[19px] text-gold-4'
                   : 'font-cn italic text-[16px] tracking-[0.04em] text-warm-1 leading-[1.6]'
               }
             >
-              {activeCue.highlight && (
-                <span className="mr-2 text-gold-3 text-[10px] font-mono tracking-widest not-italic">
-                  ▶
-                </span>
+              {isEmphasis && (
+                <span className="mr-2 text-gold-3 text-[10px] font-mono not-italic">▶</span>
               )}
-              {activeCue.text}
+              {displayText}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ── Control buttons ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        {/* Autoplay blocked → show manual play prompt */}
+      {/* ── Controls ────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-4">
         {status === 'blocked' && (
           <button
             onClick={replay}
@@ -147,44 +166,38 @@ export const VoiceoverPlayer = forwardRef<VoiceoverHandle, Props>(function Voice
                        text-gold-3 font-mono text-[9px] tracking-[0.22em]
                        hover:bg-gold-3/10 transition-colors"
           >
-            <span>▶</span> PLAY VOICE
+            ▶ PLAY VOICE
           </button>
         )}
-
-        {/* Playing / paused → skip */}
-        {(status === 'playing' || status === 'paused') && (
-          <button
-            onClick={skip}
-            className="font-mono text-[9px] tracking-[0.2em] text-warm-4 hover:text-warm-3 transition-colors"
-          >
-            SKIP ×
-          </button>
+        {status === 'playing' && (
+          <>
+            <button
+              onClick={skip}
+              className="font-mono text-[9px] tracking-[0.2em] text-warm-4 hover:text-warm-3 transition-colors"
+            >
+              SKIP ×
+            </button>
+            <div className="flex items-end gap-[2px] h-[12px]">
+              {[3, 5, 7, 4, 6].map((h, i) => (
+                <motion.div
+                  key={i}
+                  className="w-[2px] bg-gold-3/60 rounded-full"
+                  animate={{ height: [h, h * 1.8, h] }}
+                  transition={{ repeat: Infinity, duration: 0.6 + i * 0.1, ease: 'easeInOut' }}
+                  style={{ height: h }}
+                />
+              ))}
+            </div>
+          </>
         )}
-
-        {/* Ended → replay */}
         {status === 'ended' && (
           <button
             onClick={replay}
             className="flex items-center gap-1.5 font-mono text-[9px] tracking-[0.2em]
                        text-warm-4 hover:text-warm-3 transition-colors"
           >
-            <span>↺</span> REPLAY VOICE
+            ↺ REPLAY VOICE
           </button>
-        )}
-
-        {/* Waveform indicator while playing */}
-        {status === 'playing' && (
-          <div className="flex items-end gap-[2px] h-[12px]">
-            {[3, 5, 7, 4, 6].map((h, i) => (
-              <motion.div
-                key={i}
-                className="w-[2px] bg-gold-3/60 rounded-full"
-                animate={{ height: [h, h * 1.8, h] }}
-                transition={{ repeat: Infinity, duration: 0.6 + i * 0.1, ease: 'easeInOut' }}
-                style={{ height: h }}
-              />
-            ))}
-          </div>
         )}
       </div>
     </div>

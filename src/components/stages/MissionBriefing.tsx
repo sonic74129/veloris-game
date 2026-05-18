@@ -4,11 +4,16 @@ import { MissionPanel } from '../panels/MissionPanel';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { StageHeader } from '../layout/StageHeader';
 import { VoiceoverPlayer } from '../voiceover/VoiceoverPlayer';
-import { SCENE0_VOICEOVER } from '../../data/voiceovers/scene0';
+import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
+import { SCENE0_SCRIPT } from '../../content/voiceovers/scene0Miranda';
+import { SCENE0_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
 import { useMobile } from '../../lib/mobile';
+
+// Switch voice variant via VITE_MIRANDA_VOICE=ava|serena|nova|emma in .env.local
+const VOICE_VARIANT = (import.meta.env.VITE_MIRANDA_VOICE as string) ?? 'ava';
 
 interface Props { stage: StageConfig }
 
@@ -35,8 +40,11 @@ export function MissionBriefing({ stage }: Props) {
             brandLine="MIRANDA'S CHALLENGE — MISSION BRIEFING"
             subtitle={stage.subtitle}
           />
-          {/* Miranda voiceover — auto-plays on first visit */}
-          <VoiceoverPlayer voiceover={SCENE0_VOICEOVER} className="mb-1" />
+          {/* Miranda voiceover — Chinese: single file; English: line-by-line */}
+          {language === 'zh'
+            ? <SingleFileVoiceoverPlayer voiceover={SCENE0_VOICEOVER_ZH} className="mb-1" />
+            : <VoiceoverPlayer script={SCENE0_SCRIPT} audioBasePath={`audio/scene0/${VOICE_VARIANT}`} className="mb-1" />
+          }
 
           <div className="mt-2">
             <ChallengeCard

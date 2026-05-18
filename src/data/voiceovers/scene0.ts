@@ -1,25 +1,37 @@
 /**
  * Scene 0 — Miranda Briefing voiceover data.
- *
- * SSML is kept here so it matches the generation script exactly.
- *
- * SUBTITLE TIMING:
- *   Values below are estimates based on the SSML break structure.
- *   After generating public/audio/miranda-scene0.mp3, listen and adjust
- *   start / end (in seconds) to match the actual audio.
  */
 
+import type { SingleFileVoiceover } from '../../components/voiceover/SingleFileVoiceoverPlayer';
+
+// ── Chinese voiceover — miranda-scene0-zh.mp3 (~31s) ─────────────────────────
+// Cue timings are estimates from the SSML break structure; fine-tune if off.
+export const SCENE0_VOICEOVER_ZH: SingleFileVoiceover = {
+  src: 'audio/miranda-scene0-zh.mp3',
+  storageKey: 'veloris:vo:mission:played',
+  cues: [
+    { start: 0.0,  end: 2.3,  text: '嗯，你终于来了，CTO。' },
+    { start: 2.6,  end: 11.8, text: '董事会要速度，业务部门要 Agent，每一个团队都想把 AI 接进自己的系统：客户资料、订单数据、设计资产、供应链流程、财务权限。' },
+    { start: 12.2, end: 14.0, text: '听起来很美，对吗？' },
+    { start: 14.3, end: 17.2, text: '但如果没有边界，这不是未来——这是失控。' },
+    { start: 17.6, end: 20.2, text: '所以今天，你不是来做 Demo 的。' },
+    { start: 20.5, end: 26.5, text: '你是来判断：哪些系统可以连接，哪些流程必须保护，哪些 Agent 必须被治理。' },
+    { start: 26.9, end: 28.2, text: '现在，CTO。' },
+    { start: 28.5, end: 31.4, text: '证明你配得上这个位置。', emphasis: true },
+  ],
+};
+
+// ── English voiceover (legacy single-file, ~71s) ──────────────────────────────
+// Used as fallback; primary English path is line-by-line via VoiceoverPlayer.
 export interface SubtitleCue {
-  start: number;   // audio currentTime in seconds
+  start: number;
   end: number;
   text: string;
-  highlight?: boolean;   // true → gold emphasis style
+  highlight?: boolean;
 }
 
 export interface StageVoiceover {
-  /** Path relative to public/ (no leading slash) */
   src: string;
-  /** localStorage key used to track first-play state */
   storageKey: string;
   cues: SubtitleCue[];
 }
@@ -27,8 +39,6 @@ export interface StageVoiceover {
 export const SCENE0_VOICEOVER: StageVoiceover = {
   src: 'audio/miranda-scene0.mp3',
   storageKey: 'veloris:vo:mission:played',
-
-  // ── Subtitle cues (calibrated to ~71s audio; fine-tune start/end if off) ─────
   cues: [
     { start: 0.0,  end: 5.5,  text: 'Welcome to Veloris Maison.' },
     { start: 8.0,  end: 10.0, text: 'Hmm.' },
