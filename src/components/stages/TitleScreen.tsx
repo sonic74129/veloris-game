@@ -38,28 +38,30 @@ export function TitleScreen() {
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 30%)' }}
           />
 
-          {/* Start button — bottom center */}
-          <motion.button
-            className="absolute left-1/2 -translate-x-1/2 bottom-[60px] z-10 group cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); handleStart(); }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <span className="font-cns text-[26px] tracking-[0.35em] text-white/90
-                               group-hover:text-white transition-colors
-                               px-20 py-5 border border-white/30 group-hover:border-white/70
-                               bg-black/20 group-hover:bg-black/40 backdrop-blur-sm rounded">
-                开始试炼
-              </span>
-              <span className="font-mono text-[13px] tracking-[0.3em] text-white/30">
-                TAP ANYWHERE
-              </span>
-            </div>
-          </motion.button>
+          {/* Start button — very bottom of canvas */}
+          <div className="absolute left-0 right-0 bottom-[15px] z-10 flex justify-center pointer-events-none">
+            <motion.button
+              className="group cursor-pointer pointer-events-auto"
+              onClick={(e) => { e.stopPropagation(); handleStart(); }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <div className="flex flex-col items-center gap-3">
+                <span className="font-cns text-[26px] tracking-[0.35em] text-white/90
+                                 group-hover:text-white transition-colors
+                                 px-20 py-5 border border-white/30 group-hover:border-white/70
+                                 bg-black/20 group-hover:bg-black/40 backdrop-blur-sm rounded">
+                  开始试炼
+                </span>
+                <span className="font-mono text-[13px] tracking-[0.3em] text-white/30">
+                  TAP ANYWHERE
+                </span>
+              </div>
+            </motion.button>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -15,6 +15,7 @@ html, body, #root {
 
 .canvas-1920 {
   width: 1920px; height: 1080px;
+  flex-shrink: 0;
   position: relative;
   background:
     radial-gradient(ellipse at 30% 20%, rgba(201,165,90,0.08), transparent 55%),
