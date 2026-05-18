@@ -16,11 +16,9 @@ export function useCanvasScale(): CanvasInfo {
       const w = window.innerWidth;
       const h = window.innerHeight;
       const isMobileLandscape = w > h && h < 560;
-      // Mobile: fill width, allow vertical scroll
-      // Desktop: letterbox to fit both dimensions
-      const scale = isMobileLandscape
-        ? w / BASE_W
-        : Math.min(w / BASE_W, h / BASE_H);
+      // Always letterbox: scale to fit BOTH width and height.
+      // Guarantees identical layout on every device.
+      const scale = Math.min(w / BASE_W, h / BASE_H);
       setInfo({ scale, isMobileLandscape });
     };
     calc();

@@ -47,26 +47,9 @@ export function GameShell({ background, character, children }: GameShellProps) {
     </>
   );
 
-  if (isMobileLandscape) {
-    const visualH = Math.round(1080 * scale);
-    return (
-      <MobileContext.Provider value={true}>
-        {/* Wrapper: width fills screen, height = scaled canvas. Page body scrolls if taller than viewport. */}
-        <div style={{ width: '100vw', height: visualH, position: 'relative', overflow: 'hidden' }}>
-          <div
-            className="canvas-1920 origin-top-left"
-            style={{ transform: `scale(${scale})`, position: 'absolute', top: 0, left: 0 }}
-          >
-            {canvasContent}
-          </div>
-        </div>
-      </MobileContext.Provider>
-    );
-  }
-
-  /* Desktop / large-screen letterbox */
+  /* Unified letterbox on ALL devices — identical layout everywhere */
   return (
-    <MobileContext.Provider value={false}>
+    <MobileContext.Provider value={isMobileLandscape}>
       <div className="w-screen h-screen flex items-center justify-center bg-black overflow-hidden">
         <div className="canvas-1920 origin-center" style={{ transform: `scale(${scale})` }}>
           {canvasContent}
