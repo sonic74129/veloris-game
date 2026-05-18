@@ -1,7 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
-import { useGameState } from '../../hooks/useGameState';
-import { packs } from '../../data';
-import type { Language } from '../../data/types';
+import { useState, useCallback } from 'react';\nimport { useGameState } from '../../hooks/useGameState';\nimport { packs } from '../../data';\nimport type { Language } from '../../data/types';\nimport { toggleBgm, isBgmPlaying } from '../../lib/bgm';
 
 export function BottomNav() {
   const language = useGameState((s) => s.language);
@@ -64,74 +61,12 @@ function LangToggle({ current, onChange }: { current: Language; onChange: (l: La
   );
 }
 
-const BGM_URL = import.meta.env.BASE_URL + 'assets/bgm.mp3';
-const BGM_MUTED_KEY = 'veloris:bgm:muted';
-const BGM_FULL   = 0.35;
-const BGM_DUCKED = 0.07;
-
-function fadeBgm(audio: HTMLAudioElement, target: number, ms = 700) {
-  const start = audio.volume;
-  const steps = 30;
-  const delta = (target - start) / steps;
-  let i = 0;
-  const id = setInterval(() => {
-    i++;
-    audio.volume = Math.min(1, Math.max(0, start + delta * i));
-    if (i >= steps) clearInterval(id);
-  }, ms / steps);
-}
-
 function BgmToggle() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const startedRef = useRef(false);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = new Audio(BGM_URL);
-    audio.loop = true;
-    audio.volume = BGM_FULL;
-    audio.preload = 'auto';
-    audioRef.current = audio;
-
-    // Auto-start on first user interaction, unless user previously muted
-    const tryStart = () => {
-      if (startedRef.current) return;
-      if (localStorage.getItem(BGM_MUTED_KEY) === '1') return;
-      startedRef.current = true;
-      audio.play().then(() => setPlaying(true)).catch(() => {});
-    };
-
-    document.addEventListener('click',   tryStart, { once: true });
-    document.addEventListener('keydown', tryStart, { once: true });
-
-    // Duck BGM when voiceover plays, restore when done
-    const onVoStart = () => fadeBgm(audio, BGM_DUCKED);
-    const onVoEnd   = () => fadeBgm(audio, BGM_FULL);
-    document.addEventListener('veloris:vo:start', onVoStart);
-    document.addEventListener('veloris:vo:end',   onVoEnd);
-
-    return () => {
-      document.removeEventListener('click',           tryStart);
-      document.removeEventListener('keydown',         tryStart);
-      document.removeEventListener('veloris:vo:start', onVoStart);
-      document.removeEventListener('veloris:vo:end',   onVoEnd);
-      audio.pause();
-      audio.src = '';
-    };
-  }, []);
+  const [playing, setPlaying] = useState(isBgmPlaying);
 
   const toggle = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-      localStorage.setItem(BGM_MUTED_KEY, '1');
-    } else {
-      audio.play().then(() => setPlaying(true)).catch(() => {});
-      localStorage.removeItem(BGM_MUTED_KEY);
-    }
-  }, [playing]);
+    toggleBgm(setPlaying);
+  }, []);
 
   return (
     <button

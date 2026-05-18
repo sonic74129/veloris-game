@@ -7,6 +7,7 @@ import { DragMatchStage } from './components/stages/DragMatchStage';
 import { ComingSoonStage } from './components/stages/ComingSoonStage';
 import { useGameState } from './hooks/useGameState';
 import { packs } from './data';
+import { initBgm } from './lib/bgm';
 
 function usePortraitMobile() {
   const [is, setIs] = useState(false);
@@ -34,6 +35,9 @@ export default function App() {
   void usePortraitMobile();
   const pack = packs[language];
   const stage = pack.stages.find((s) => s.id === currentStageId) ?? pack.stages[0];
+
+  // BGM: init at App level so it works even on the title screen (hideHud=true)
+  useEffect(() => initBgm(import.meta.env.BASE_URL, () => {}), []);
 
   const render = () => {
     if (stage.comingSoon) return <ComingSoonStage stage={stage} />;
