@@ -1,4 +1,8 @@
-import { useState, useCallback } from 'react';\nimport { useGameState } from '../../hooks/useGameState';\nimport { packs } from '../../data';\nimport type { Language } from '../../data/types';\nimport { toggleBgm, isBgmPlaying } from '../../lib/bgm';
+import { useState, useCallback } from 'react';
+import { useGameState } from '../../hooks/useGameState';
+import { packs } from '../../data';
+import type { Language } from '../../data/types';
+import { toggleBgm, isBgmPlaying } from '../../lib/bgm';
 
 export function BottomNav() {
   const language = useGameState((s) => s.language);
