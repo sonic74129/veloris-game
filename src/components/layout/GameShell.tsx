@@ -12,9 +12,11 @@ interface GameShellProps {
   character?: ReactNode;
   /** main stage content */
   children: ReactNode;
+  /** hide TopStatusBar and BottomNav (e.g. for title screen) */
+  hideHud?: boolean;
 }
 
-export function GameShell({ background, character, children }: GameShellProps) {
+export function GameShell({ background, character, children, hideHud = false }: GameShellProps) {
   const { scale, isMobileLandscape } = useCanvasScale();
   const isPortraitMobile = usePortraitMobile();
 
@@ -40,8 +42,8 @@ export function GameShell({ background, character, children }: GameShellProps) {
       )}
 
       <div className="absolute inset-0 z-[5]">{children}</div>
-      <TopStatusBar />
-      <BottomNav />
+      {!hideHud && <TopStatusBar />}
+      {!hideHud && <BottomNav />}
     </>
   );
 

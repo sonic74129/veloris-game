@@ -13,12 +13,12 @@ export function TitleScreen() {
     setTimeout(() => goToStage('mission'), 900);
   };
 
+  /* Renders inside GameShell's 1920×1080 canvas — fills it edge-to-edge */
   return (
     <AnimatePresence>
       {!exiting && (
         <motion.div
-          className="fixed inset-0 z-50 cursor-pointer bg-black"
-          style={{ height: '100dvh' }}
+          className="absolute inset-0 z-[10] cursor-pointer bg-black"
           onClick={handleStart}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -33,14 +33,14 @@ export function TitleScreen() {
             draggable={false}
           />
 
-          {/* Subtle vignette so button is legible */}
+          {/* Bottom vignette for button legibility */}
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 30%)' }}
           />
 
-          {/* Start button — pinned to very bottom */}
+          {/* Start button — bottom center */}
           <motion.button
-            className="absolute left-1/2 -translate-x-1/2 bottom-3 sm:bottom-4 z-10 group cursor-pointer"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[60px] z-10 group cursor-pointer"
             onClick={(e) => { e.stopPropagation(); handleStart(); }}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -48,14 +48,14 @@ export function TitleScreen() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            <div className="flex flex-col items-center gap-1">
-              <span className="font-cns text-[13px] sm:text-[15px] tracking-[0.35em] text-white/90
+            <div className="flex flex-col items-center gap-3">
+              <span className="font-cns text-[26px] tracking-[0.35em] text-white/90
                                group-hover:text-white transition-colors
-                               px-10 py-2 sm:px-14 sm:py-3 border border-white/30 group-hover:border-white/70
+                               px-20 py-5 border border-white/30 group-hover:border-white/70
                                bg-black/20 group-hover:bg-black/40 backdrop-blur-sm rounded">
                 开始试炼
               </span>
-              <span className="font-mono text-[7px] sm:text-[8px] tracking-[0.3em] text-white/30">
+              <span className="font-mono text-[13px] tracking-[0.3em] text-white/30">
                 TAP ANYWHERE
               </span>
             </div>

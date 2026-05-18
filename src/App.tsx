@@ -5,7 +5,6 @@ import { MissionBriefing } from './components/stages/MissionBriefing';
 import { LevelMap } from './components/stages/LevelMap';
 import { DragMatchStage } from './components/stages/DragMatchStage';
 import { ComingSoonStage } from './components/stages/ComingSoonStage';
-import { RotatePrompt } from './components/layout/RotatePrompt';
 import { useGameState } from './hooks/useGameState';
 import { packs } from './data';
 
@@ -31,7 +30,8 @@ function usePortraitMobile() {
 export default function App() {
   const language = useGameState((s) => s.language);
   const currentStageId = useGameState((s) => s.currentStageId);
-  const isPortrait = usePortraitMobile();
+  // Reserved for future use (e.g. analytics on portrait)
+  void usePortraitMobile();
   const pack = packs[language];
   const stage = pack.stages.find((s) => s.id === currentStageId) ?? pack.stages[0];
 
@@ -48,13 +48,13 @@ export default function App() {
     }
   };
 
-  /* Portrait mobile: always show rotate prompt regardless of stage */
-  if (isPortrait) return <RotatePrompt />;
-
-  /* Title screen bypasses GameShell canvas — renders full-viewport directly */
-  if (currentStageId === 'title') {
-    return <TitleScreen />;
-  }
-
-  return <GameShell>{render()}</GameShell>;
+  /* Unified rendering: all screens (including title) go through GameShell's letterbox canvas.
+     GameShell handles portrait→RotatePrompt internally. */
+  return (
+    <GameShell hideHud={currentStageId === 'title'}>
+      {render()}
+    </GameShell>
+  );
 }
+
+
