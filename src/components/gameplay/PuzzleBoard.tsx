@@ -23,6 +23,10 @@ export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete }: P
   const options = stage.options ?? [];
   const correctMap = stage.correctMapping ?? {};
 
+  // Stable shuffle of options keyed on stage.id so the visual order doesn't
+  // trivially reveal the correct answer, but stays stable across re-renders.
+  const shuffledOptions = useMemo(() => shuffleStable(options, stage.id), [options, stage.id]);
+
   const assignments = useGameState((s) => s.slotAssignments);
   const validate = useGameState((s) => s.validatePlacement);
 
@@ -119,7 +123,7 @@ export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete }: P
       <div className="mt-6">
         <div className="eyebrow mb-3">Option Pool · 选项卡</div>
         <div className="flex flex-wrap gap-3">
-          {options.map((o) => (
+          {shuffledOptions.map((o) => (
             <DragOptionCard
               key={o.id}
               option={o}
@@ -153,4 +157,29 @@ export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete }: P
       </DragOverlay>
     </DndContext>
   );
+}
+
+/**
+ * Fisher–Yates shuffle seeded by a string key so the order is randomized
+ * per stage but stable across renders / reloads of that same stage.
+ */
+function shuffleStable<T>(items: T[], seedKey: string): T[] {
+  const arr = items.slice();
+  let seed = 0;
+  for (let i = 0; i < seedKey.length; i++) {
+    seed = (seed * 31 + seedKey.charCodeAt(i)) >>> 0;
+  }
+  const rand = () => {
+    // mulberry32
+    seed = (seed + 0x6D2B79F5) >>> 0;
+    let t = seed;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
