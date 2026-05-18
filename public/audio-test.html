@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voiceover Audio Test</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #0d0d0d; color: #ddd; padding: 40px; }
+    h1 { color: #fff; margin-bottom: 32px; font-size: 20px; letter-spacing: .1em; }
+    h2 { color: #c9a84c; margin-bottom: 10px; font-size: 15px; letter-spacing: .12em; }
+    .card { background: #181818; border: 1px solid #2a2a2a; border-radius: 10px; padding: 24px; margin-bottom: 36px; max-width: 660px; }
+    audio { width: 100%; margin-top: 10px; }
+
+    /* ── speaker chips ── */
+    .speakers { display: flex; gap: 14px; margin: 16px 0 6px; }
+    .chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; letter-spacing: .14em;
+      border: 1.5px solid transparent;
+      transition: box-shadow .15s, border-color .15s, color .15s;
+      user-select: none;
+    }
+    .chip .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      transition: transform .15s;
+    }
+    /* Kinky — gold */
+    .chip-k { color: #b8903a; border-color: #2e2615; }
+    .chip-k .dot { background: #c9a84c; }
+    /* Lily — sky blue */
+    .chip-l { color: #6aaad4; border-color: #162030; }
+    .chip-l .dot { background: #8bc4f0; }
+
+    /* active state */
+    .chip-k.active {
+      color: #ffe08a;
+      border-color: #c9a84c;
+      box-shadow: 0 0 10px 2px rgba(201,168,76,.45), 0 0 24px 4px rgba(201,168,76,.18);
+    }
+    .chip-k.active .dot { transform: scale(1.35); }
+    .chip-l.active {
+      color: #b8e0ff;
+      border-color: #8bc4f0;
+      box-shadow: 0 0 10px 2px rgba(139,196,240,.45), 0 0 24px 4px rgba(139,196,240,.18);
+    }
+    .chip-l.active .dot { transform: scale(1.35); }
+
+    /* ── subtitle line ── */
+    .subtitle {
+      min-height: 44px; margin-top: 10px;
+      font-size: 14px; line-height: 1.75; color: #ccc;
+      transition: color .2s;
+    }
+
+    /* ── script lines ── */
+    .lines { margin-top: 14px; font-size: 12.5px; line-height: 1.85; color: #666; }
+    .lines b { font-weight: 700; }
+    .lines .k { color: #7a6020; }
+    .lines .l { color: #2a5070; }
+    .line { padding: 2px 0; transition: color .15s; }
+    .line.active { color: #ddd !important; }
+    .line.active.k-line { color: #ffe08a !important; }
+    .line.active.l-line { color: #b8e0ff !important; }
+  </style>
+</head>
+<body>
+  <h1>🎙️ VOICEOVER 试听</h1>
+
+  <!-- ── Miranda ───────────────────────────────── -->
+  <div class="card">
+    <h2>SCENE 0 · MIRANDA 开场白</h2>
+    <audio id="a-miranda" controls src="audio/miranda-scene0-zh.mp3"></audio>
+    <div class="speakers">
+      <div class="chip chip-k" id="chip-miranda">
+        <div class="dot"></div>MIRANDA
+      </div>
+    </div>
+    <div class="subtitle" id="sub-miranda">—</div>
+  </div>
+
+  <!-- ── Kinky + Lily ──────────────────────────── -->
+  <div class="card">
+    <h2>MAP · KINKY + LILY 对话</h2>
+    <audio id="a-map" controls src="audio/kinky-lily-map-zh.mp3"></audio>
+    <div class="speakers">
+      <div class="chip chip-k" id="chip-kinky"><div class="dot"></div>KINKY</div>
+      <div class="chip chip-l" id="chip-lily"><div class="dot"></div>LILY</div>
+    </div>
+    <div class="subtitle" id="sub-map">—</div>
+    <div class="lines" id="script-map">
+      <div class="line k-line" data-start="0.19"  data-end="4.79"  data-who="k"><b class="k">KINKY</b>　哎呀，别被 Miranda 吓到了。她只是喜欢用董事会的语气开场。</div>
+      <div class="line l-line" data-start="5.76"  data-end="10.04" data-who="l"><b class="l">LILY</b>　　好啦，CTO，别那么紧张嘛。你不是一个人在闯关。</div>
+      <div class="line k-line" data-start="10.94" data-end="14.57" data-who="k"><b class="k">KINKY</b>　我们会陪你把 AI 接进真正的业务系统，但不是乱接。</div>
+      <div class="line l-line" data-start="15.41" data-end="22.06" data-who="l"><b class="l">LILY</b>　　对，要接得快，也要接得安全。Agent、数据、流程、权限，一个都不能放飞。</div>
+      <div class="line k-line" data-start="22.97" data-end="28.19" data-who="k"><b class="k">KINKY</b>　从现在开始，我们代表 Microsoft，帮你一步一步打造 AI Frontier Firm。</div>
+      <div class="line l-line" data-start="29.07" data-end="33.59" data-who="l"><b class="l">LILY</b>　　放心啦。只要你做对选择，这家公司一定可以升级成功。</div>
+      <div class="line k-line" data-start="34.46" data-end="36.58" data-who="k"><b class="k">KINKY</b>　那么，CTO，准备好了吗？</div>
+      <div class="line l-line" data-start="37.43" data-end="38.81" data-who="l"><b class="l">LILY</b>　　第一关，要开始咯。</div>
+    </div>
+  </div>
+
+  <script>
+    // ── Miranda: single speaker, always lit while playing ────────────────────
+    const aMiranda = document.getElementById('a-miranda');
+    const chipMiranda = document.getElementById('chip-miranda');
+    const subMiranda  = document.getElementById('sub-miranda');
+
+    const MIRANDA_CUES = [
+      { s: 0.15,  e: 1.85,  t: '嗯，你终于来了，CTO。' },
+      { s: 2.78,  e: 7.48,  t: '董事会要速度，业务部门要 Agent，所有流程都要智能化。' },
+      { s: 8.10,  e: 12.28, t: '客户资料、订单数据、设计资产、供应链流程、财务权限。' },
+      { s: 13.24, e: 14.44, t: '听起来很美，对吗？' },
+      { s: 15.27, e: 17.91, t: '但如果没有边界，这不是未来——这是失控。' },
+      { s: 18.85, e: 20.57, t: '所以今天，你不是来做 Demo 的。' },
+      { s: 21.44, e: 26.63, t: '你是来判断：哪些系统可以连接，哪些数据可以开放，哪些权限必须锁住。' },
+      { s: 27.61, e: 28.64, t: '现在，CTO。' },
+      { s: 29.50, e: 30.90, t: '证明你配得上这个位置。' },
+    ];
+
+    aMiranda.addEventListener('play',  () => chipMiranda.classList.add('active'));
+    aMiranda.addEventListener('pause', () => { chipMiranda.classList.remove('active'); subMiranda.textContent = '—'; });
+    aMiranda.addEventListener('ended', () => { chipMiranda.classList.remove('active'); subMiranda.textContent = '—'; });
+    aMiranda.addEventListener('timeupdate', () => {
+      const t = aMiranda.currentTime;
+      const cue = MIRANDA_CUES.find(c => t >= c.s && t <= c.e);
+      subMiranda.textContent = cue ? cue.t : '—';
+    });
+
+    // ── Map: Kinky / Lily alternate glow ─────────────────────────────────────
+    const aMap     = document.getElementById('a-map');
+    const chipK    = document.getElementById('chip-kinky');
+    const chipL    = document.getElementById('chip-lily');
+    const subMap   = document.getElementById('sub-map');
+    const lines    = Array.from(document.querySelectorAll('#script-map .line'));
+
+    function clearMap() {
+      chipK.classList.remove('active');
+      chipL.classList.remove('active');
+      lines.forEach(l => l.classList.remove('active'));
+      subMap.textContent = '—';
+    }
+
+    aMap.addEventListener('pause', clearMap);
+    aMap.addEventListener('ended', clearMap);
+
+    aMap.addEventListener('timeupdate', () => {
+      const t = aMap.currentTime;
+      let active = null;
+      for (const line of lines) {
+        const s = parseFloat(line.dataset.start);
+        const e = parseFloat(line.dataset.end);
+        if (t >= s && t <= e) { active = line; break; }
+      }
+      lines.forEach(l => l.classList.remove('active'));
+      chipK.classList.remove('active');
+      chipL.classList.remove('active');
+      if (active) {
+        active.classList.add('active');
+        subMap.textContent = active.querySelector('b').nextSibling.textContent.trim();
+        if (active.dataset.who === 'k') chipK.classList.add('active');
+        else                            chipL.classList.add('active');
+      } else {
+        subMap.textContent = '—';
+      }
+    });
+  </script>
+</body>
+</html>

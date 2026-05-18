@@ -11,14 +11,14 @@ export const MAP_VOICEOVER_ZH: SingleFileVoiceover = {
   src: 'audio/kinky-lily-map-zh.mp3',
   storageKey: 'veloris:vo:map:played',
   cues: [
-    { start: 0.19,  end: 4.97,  text: '哎呀，别被 Miranda 吓到了。她只是喜欢用董事会的语气开场。' },
-    { start: 5.95,  end: 10.18, text: '哈哈，CTO，放轻松一点。你不是一个人在闯关。', emphasis: true },
-    { start: 11.04, end: 14.42, text: '我们会陪你把 AI 接进真正的业务系统，但不是乱接。' },
-    { start: 15.29, end: 21.48, text: '对，要接得快，也要接得安全。Agent、数据、流程、权限，一个都不能放飞。', emphasis: true },
-    { start: 22.36, end: 27.16, text: '从现在开始，我们代表 Microsoft，帮你一步一步打造 AI Frontier Firm。' },
-    { start: 28.03, end: 32.64, text: '放心啦。只要你做对选择，这家公司一定可以升级成功。', emphasis: true },
-    { start: 33.54, end: 35.66, text: '那么，CTO，准备好了吗？' },
-    { start: 36.53, end: 37.91, text: '第一关，要开始咯。', emphasis: true },
+    { start: 0.19,  end: 4.79,  text: '哎呀，别被 Miranda 吓到了。她只是喜欢用董事会的语气开场。', speaker: 'kinky' },
+    { start: 5.76,  end: 10.04, text: '好啦，CTO，别那么紧张嘛。你不是一个人在闯关。', emphasis: true, speaker: 'lily' },
+    { start: 10.94, end: 14.57, text: '我们会陪你把 AI 接进真正的业务系统，但不是乱接。', speaker: 'kinky' },
+    { start: 15.41, end: 22.06, text: '对，要接得快，也要接得安全。Agent、数据、流程、权限，一个都不能放飞。', emphasis: true, speaker: 'lily' },
+    { start: 22.97, end: 28.19, text: '从现在开始，我们代表 Microsoft，帮你一步一步打造 AI Frontier Firm。', speaker: 'kinky' },
+    { start: 29.07, end: 33.59, text: '放心啦。只要你做对选择，这家公司一定可以升级成功。', emphasis: true, speaker: 'lily' },
+    { start: 34.46, end: 36.58, text: '那么，CTO，准备好了吗？', speaker: 'kinky' },
+    { start: 37.43, end: 38.81, text: '第一关，要开始咯。', emphasis: true, speaker: 'lily' },
   ],
 };
 

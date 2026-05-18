@@ -10,22 +10,24 @@ const TMP      = join(ROOT, 'public/audio/_tmp_map');
 const OUTPUT   = join(ROOT, 'public/audio/kinky-lily-map-zh.mp3');
 
 // ── Segments: { voice, style, degree, rate, pitch, text, pauseAfterMs } ───────
+// NOTE: zh-CN-Xiaoyi:DragonHDFlashLatestNeural is unavailable on this endpoint;
+//       using zh-CN-XiaoxiaoNeural for Lily (cute→cheerful, gentle→gentle).
 const SEGMENTS = [
-  { voice:'zh-CN-XiaomoNeural',   style:'cheerful',    degree:1.25, rate:'+8%',  pitch:'-1%', pauseAfterMs:220,
-    text:'哎呀，别被 Miranda 吓到了。<break time="180ms"/>她只是喜欢用董事会的语气开场。' },
-  { voice:'zh-CN-XiaoxiaoNeural', style:'cheerful',    degree:1.3,  rate:'+10%', pitch:'+2%', pauseAfterMs:220,
-    text:'哈哈，CTO，放轻松一点。<break time="160ms"/>你不是一个人在闯关。' },
-  { voice:'zh-CN-XiaomoNeural',   style:'calm',        degree:1.15, rate:'+8%',  pitch:'-1%', pauseAfterMs:180,
-    text:'我们会陪你把 AI 接进真正的业务系统，<break time="160ms"/>但不是乱接。' },
-  { voice:'zh-CN-XiaoxiaoNeural', style:'serious',     degree:1.2,  rate:'+11%', pitch:'+2%', pauseAfterMs:240,
-    text:'对，要接得快，也要接得安全。<break time="140ms"/>Agent、数据、流程、权限，一个都不能放飞。' },
-  { voice:'zh-CN-XiaomoNeural',   style:'calm',        degree:1.2,  rate:'+8%',  pitch:'-1%', pauseAfterMs:180,
-    text:'从现在开始，我们代表 Microsoft，<break time="150ms"/>帮你一步一步打造 AI Frontier Firm。' },
-  { voice:'zh-CN-XiaoxiaoNeural', style:'calm',        degree:1.2,  rate:'+9%',  pitch:'+2%', pauseAfterMs:240,
-    text:'放心啦。<break time="160ms"/>只要你做对选择，这家公司一定可以升级成功。' },
-  { voice:'zh-CN-XiaomoNeural',   style:'cheerful',    degree:1.2,  rate:'+9%',  pitch:'-1%', pauseAfterMs:180,
+  { voice:'zh-CN-XiaomoNeural',   style:'cheerful',     degree:1.2,  rate:'+8%',  pitch:'-1%', pauseAfterMs:220,
+    text:'哎呀，别被 Miranda 吓到了。她只是喜欢用董事会的语气开场。' },
+  { voice:'zh-CN-XiaoxiaoNeural', style:'cheerful',     degree:1.18, rate:'+9%',  pitch:'+2%', pauseAfterMs:220,
+    text:'好啦，CTO，别那么紧张嘛。<break time="180ms"/>你不是一个人在闯关。' },
+  { voice:'zh-CN-XiaomoNeural',   style:'calm',         degree:1.15, rate:'+8%',  pitch:'-1%', pauseAfterMs:180,
+    text:'我们会陪你把 AI 接进真正的业务系统，但不是乱接。' },
+  { voice:'zh-CN-XiaoxiaoNeural', style:'cheerful',     degree:1.25, rate:'+10%', pitch:'+2%', pauseAfterMs:220,
+    text:'对，要接得快，也要接得安全。Agent、数据、流程、权限，一个都不能放飞。' },
+  { voice:'zh-CN-XiaomoNeural',   style:'affectionate', degree:1.18, rate:'+8%',  pitch:'-1%', pauseAfterMs:180,
+    text:'从现在开始，我们代表 Microsoft，帮你一步一步打造 AI Frontier Firm。' },
+  { voice:'zh-CN-XiaoxiaoNeural', style:'gentle',       degree:1.2,  rate:'+9%',  pitch:'+2%', pauseAfterMs:220,
+    text:'放心啦。只要你做对选择，这家公司一定可以升级成功。' },
+  { voice:'zh-CN-XiaomoNeural',   style:'cheerful',     degree:1.18, rate:'+9%',  pitch:'-1%', pauseAfterMs:160,
     text:'那么，CTO，准备好了吗？' },
-  { voice:'zh-CN-XiaoxiaoNeural', style:'cheerful',    degree:1.3,  rate:'+11%', pitch:'+2%', pauseAfterMs:0,
+  { voice:'zh-CN-XiaoxiaoNeural', style:'cheerful',     degree:1.2,  rate:'+10%', pitch:'+2%', pauseAfterMs:0,
     text:'第一关，要开始咯。' },
 ];
 

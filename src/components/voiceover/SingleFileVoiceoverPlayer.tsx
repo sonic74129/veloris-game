@@ -6,6 +6,7 @@ export interface SubtitleCue {
   end: number;
   text: string;
   emphasis?: boolean;  // gold + uppercase treatment
+  speaker?: string;    // e.g. 'kinky' | 'lily' — fires veloris:vo:speaker event
 }
 
 export interface SingleFileVoiceover {
@@ -32,8 +33,9 @@ export function SingleFileVoiceoverPlayer({
   className = '',
 }: Props) {
   const { src, storageKey, cues } = voiceover;
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const didInit  = useRef(false);
+  const audioRef    = useRef<HTMLAudioElement>(null);
+  const didInit     = useRef(false);
+  const prevSpeaker = useRef<string | null>(null);
 
   const [status,     setStatus]     = useState<Status>('idle');
   const [activeCue,  setActiveCue]  = useState<SubtitleCue | null>(null);
@@ -63,6 +65,8 @@ export function SingleFileVoiceoverPlayer({
     if (el) { el.pause(); el.currentTime = el.duration || 0; }
     setStatus('ended');
     setActiveCue(null);
+    prevSpeaker.current = null;
+    document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
     localStorage.setItem(storageKey, '1');
     document.dispatchEvent(new CustomEvent('veloris:vo:end'));
     onEnded?.();
@@ -83,11 +87,18 @@ export function SingleFileVoiceoverPlayer({
       const t = el.currentTime;
       const cue = cues.find(c => t >= c.start && t < c.end) ?? null;
       setActiveCue(cue);
+      const who = cue?.speaker ?? null;
+      if (who !== prevSpeaker.current) {
+        prevSpeaker.current = who;
+        document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who } }));
+      }
     };
 
     const handleEnded = () => {
       setStatus('ended');
       setActiveCue(null);
+      prevSpeaker.current = null;
+      document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
       localStorage.setItem(storageKey, '1');
       document.dispatchEvent(new CustomEvent('veloris:vo:end'));
       onEnded?.();
