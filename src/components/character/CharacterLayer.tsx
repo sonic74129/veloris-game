@@ -67,7 +67,7 @@ export function CharacterLayer({
             alt="Kinky"
             style={{
               position: 'absolute',
-              left: 620, bottom: 340,
+              left: 700, bottom: 340,
               height: 640,
               width: 'auto',
               filter: 'drop-shadow(0 24px 36px rgba(0,0,0,0.65))',

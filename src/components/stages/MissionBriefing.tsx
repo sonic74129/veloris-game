@@ -66,11 +66,11 @@ export function MissionBriefing({ stage }: Props) {
             <div className="glass p-4 frame-corners relative">
               <span className="c-tl" /><span className="c-br" />
               <div className="eyebrow mb-2">MIRANDA · QUOTE</div>
-              <div className="font-cn italic text-[14px] text-gold-4 leading-[1.6]">
+              <div className="font-cn italic text-[14px] text-gold-4 leading-[1.6] whitespace-pre-line">
                 "{stage.challenge.quote}"
               </div>
               <div className="mt-3 font-mono text-[9px] tracking-[0.28em] text-warm-3">
-                — VELORIS MAISON, FW26
+                — Miranda Veloris, Maison Queen
               </div>
             </div>
           )}

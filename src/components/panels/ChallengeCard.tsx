@@ -10,7 +10,7 @@ export function ChallengeCard({ title, body, speaker, quote }: ChallengeCardProp
     <div className="glass frame-corners p-6 relative">
       <span className="c-tl" /><span className="c-br" />
       <div className="eyebrow mb-2">{title}</div>
-      <div className="font-cn text-[16px] leading-[1.7] text-warm-1">
+      <div className="font-cn text-[16px] leading-[1.7] text-warm-1 whitespace-pre-line">
         {body}
       </div>
       {quote && (

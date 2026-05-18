@@ -56,19 +56,19 @@ export const zhPack: LanguagePack = {
       id: 'mission',
       type: 'briefing',
       title: '第 0 关 · 任务简报',
-      subtitle: "Miranda 的挑战",
+      subtitle: 'Miranda 的挑战',
       challenge: {
-        speaker: 'M. VELORIS',
-        title: 'MIRANDA\'S CHALLENGE — MISSION BRIEFING',
-        body: '在下一季发布前，将一家分散运作的时尚企业，转型为 AI 驱动的 Frontier Firm。',
-        quote: '时尚的未来，属于那些能以智慧与速度，重新定义并引领时尚的人。',
+        speaker: 'MIRANDA VELORIS · MAISON QUEEN',
+        title: 'CHAIRWOMAN 的挑战',
+        body: 'Miranda Veloris 是 Veloris Maison 的女王级掌权者，也是这家时尚帝国真正的大老板。\n\n她定义品牌审美，决定每一季的方向，也决定这家公司是否能继续站在全球时尚的最前线。\n\n现在，她召见了你——Veloris Maison 新任 CTO。在下一季发布前，你必须完成一场不容失败的 AI 转型试炼。\n\n这家时尚集团拥有顶级设计与全球影响力，却被分散的旧系统、割裂的数据、缓慢的流程和无法规模化的 AI 试点拖住脚步。\n\n你的任务，是通过 5 场 Transformation Trial，帮助 Miranda 将 Veloris Maison 升级为真正的 AI-driven Frontier Firm。',
+        quote: '秀场不会等待任何人。\n转型也不会。',
       },
       missionObjectives: [
-        '整合分散的数据文件，建立单一数据源',
-        '优化流程，将有灵感到上架的周期缩短',
-        '国际化并优化跨区域的运营效率',
-        '部署 AI 数字员工，赋能治理',
-        '实现对手行动的实时监控',
+        '作为新任 CTO，盘点旧系统与关键应用，找出转型断点',
+        '建立企业知识层，让会议、文件与业务数据成为 AI 可理解的资产',
+        '打造 AI-ready data foundation，让 Data Agent 能可靠回答业务问题',
+        '部署企业级 Agent，让流程从人工协作走向智能自动化',
+        '建立多云 AI 安全防线，保护模型、数据与 Agent 行动',
       ],
     },
 
@@ -78,8 +78,9 @@ export const zhPack: LanguagePack = {
     {
       id: 'map',
       type: 'map',
-      title: 'Kinky 与 Lily 的五阶段转型蓝图',
-      subtitle: '从分散的工作模式，迈向 AI 驱动的时尚营运模型',
+      title: 'Kinky 与 Lily 助你成为 Frontier Firm',
+      subtitle: '作为 CTO，你刚刚听完 Miranda 在场景一提出的五大挑战。微软派来了 Kinky 与 Lily，专为你的企业一一拆解解法。',
+
     },
 
     // ─────────────────────────────────────────────────────────────

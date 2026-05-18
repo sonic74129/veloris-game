@@ -35,12 +35,12 @@ export function LevelMap() {
       <div className={`absolute right-[40px] z-[6] ${
         isMobile ? 'top-[55px] left-[40px]' : 'top-[100px] left-[60px]'
       }`}>
-        <div className="eyebrow">SCENE · 02 · LEVEL MAP</div>
+        <div className="eyebrow">SCENE · 02 · MICROSOFT ADVISORY</div>
         <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
           {stage.title}
         </div>
         <div className="font-brand text-[12px] tracking-[0.36em] text-gold-3 mt-3">
-          KINKY & LILY · FIVE-STAGE TRANSFORMATION BLUEPRINT
+          CTO · FIVE CHALLENGES · MICROSOFT SOLUTION
         </div>
         <div className="font-cns text-[13px] text-warm-2 mt-2 max-w-[860px]">
           {stage.subtitle}
@@ -128,7 +128,7 @@ export function LevelMap() {
                   {node.subtitle}
                 </div>
                 <div className="font-mono text-[11px] tracking-[0.28em] text-gold-4 mt-2">
-                  STAGE · 0{idx + 1}
+                  ISSUE · 0{idx + 1}
                 </div>
               </motion.button>
             );
