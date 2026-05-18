@@ -17,7 +17,7 @@ export function TitleScreen() {
     <AnimatePresence>
       {!exiting && (
         <motion.div
-          className="absolute inset-0 z-10 flex flex-col items-end justify-end cursor-pointer"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-end cursor-pointer"
           onClick={handleStart}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -39,7 +39,7 @@ export function TitleScreen() {
 
           {/* Start button — bottom-right */}
           <motion.button
-            className="relative z-10 mb-[80px] mr-[80px] group cursor-pointer"
+            className="relative z-10 mb-[80px] group cursor-pointer"
             onClick={(e) => { e.stopPropagation(); handleStart(); }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
