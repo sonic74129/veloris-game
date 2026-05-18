@@ -16,8 +16,7 @@ export function useCanvasScale(): CanvasInfo {
       const w = window.innerWidth;
       const h = window.innerHeight;
       const isMobileLandscape = w > h && h < 560;
-      // Always letterbox: scale to fit BOTH width and height.
-      // Guarantees identical layout on every device.
+      // Always letterbox: fit both dimensions.
       const scale = Math.min(w / BASE_W, h / BASE_H);
       setInfo({ scale, isMobileLandscape });
     };

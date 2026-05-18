@@ -18,8 +18,6 @@ export function GameShell({ background, character, children }: GameShellProps) {
   const { scale, isMobileLandscape } = useCanvasScale();
   const isPortraitMobile = usePortraitMobile();
 
-  if (isPortraitMobile) return <RotatePrompt />;
-
   /* ---------- canvas content ---------- */
   const canvasContent = (
     <>
@@ -47,7 +45,10 @@ export function GameShell({ background, character, children }: GameShellProps) {
     </>
   );
 
-  /* Unified letterbox on ALL devices — identical layout everywhere */
+  /* Portrait mobile: show rotate prompt */
+  if (isPortraitMobile) return <RotatePrompt />;
+
+  /* All devices: unified letterbox */
   return (
     <MobileContext.Provider value={isMobileLandscape}>
       <div className="w-screen h-screen flex items-center justify-center bg-black overflow-hidden">
