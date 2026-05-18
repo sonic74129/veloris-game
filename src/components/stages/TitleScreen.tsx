@@ -25,11 +25,11 @@ export function TitleScreen() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {/* Full-bleed cover image */}
+          {/* Full poster, contained (no cropping) */}
           <img
             src={`${BASE_URL}assets/frontpage.png`}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
             draggable={false}
           />
 
