@@ -40,65 +40,93 @@ const USE_AAD = process.argv.includes('--aad');
 // ── SSML ──────────────────────────────────────────────────────────────────────
 const SSML = `<speak version="1.0"
        xmlns="http://www.w3.org/2001/10/synthesis"
-       xmlns:mstts="https://www.w3.org/2001/mstts"
+       xmlns:mstts="http://www.w3.org/2001/mstts"
        xml:lang="en-US">
 
   <voice name="en-US-Ava:DragonHDOmniLatestNeural"
-         parameters="temperature=0.76;top_p=0.78;top_k=30;cfg_scale=1.15">
+         parameters="temperature=0.95">
 
-    <mstts:express-as style="calm" styledegree="1.1">
-      Welcome to Veloris Maison.
+    <mstts:express-as style="reflective" styledegree="1.2">
+      Welcome
+      <break time="400ms"/>
+      to Veloris Maison.
     </mstts:express-as>
 
-    <break time="750ms"/>
+    <break time="900ms"/>
 
-    <mstts:express-as style="serious" styledegree="1.25">
+    <mstts:paralinguistic type="breathing"/>
+    <break time="250ms"/>
+
+    <mstts:express-as style="disappointed" styledegree="1.4">
       Hmm.
-      <break time="350ms"/>
-      I brought you here because this house is running out of time.
     </mstts:express-as>
+    <break time="500ms"/>
 
-    <break time="650ms"/>
-
-    <mstts:express-as style="serious" styledegree="1.15">
-      Our systems are fragmented.
-      <break time="400ms"/>
-      Our data is scattered.
-      <break time="400ms"/>
-      Our AI is everywhere —
+    <mstts:express-as style="serious" styledegree="1.3">
+      I brought you here
       <break time="350ms"/>
-      but transformation is nowhere.
+      because this house
+      <break time="300ms"/>
+      is running out of time.
     </mstts:express-as>
 
     <break time="800ms"/>
 
-    <mstts:express-as style="serious" styledegree="1.3">
-      Well.
-      <break time="300ms"/>
-      That changes now.
-    </mstts:express-as>
-
-    <break time="600ms"/>
-
-    <mstts:express-as style="confident" styledegree="1.3">
-      You are my new CTO.
-    </mstts:express-as>
-
-    <break time="650ms"/>
-
-    <mstts:express-as style="determined" styledegree="1.25">
-      Before the next season begins,
-      <break time="300ms"/>
-      you will rebuild this maison into an AI-driven Frontier Firm.
-    </mstts:express-as>
-
-    <break time="950ms"/>
-
-    <mstts:express-as style="serious" styledegree="1.55">
-      Five trials.
+    <mstts:express-as style="frustrated" styledegree="1.3">
+      Our systems are fragmented.
       <break time="450ms"/>
+      Our data
+      <break time="250ms"/>
+      is scattered.
+      <break time="450ms"/>
+      Our AI is everywhere
+      <break time="400ms"/>
+    </mstts:express-as>
+
+    <mstts:express-as style="disappointed" styledegree="1.5">
+      but transformation
+      <break time="300ms"/>
+      is nowhere.
+    </mstts:express-as>
+
+    <break time="900ms"/>
+
+    <mstts:paralinguistic type="sighing"/>
+    <break time="400ms"/>
+
+    <mstts:express-as style="defiant" styledegree="1.4">
+      Well.
+      <break time="350ms"/>
+      That changes
+      <break time="200ms"/>
+      now.
+    </mstts:express-as>
+
+    <break time="700ms"/>
+
+    <mstts:express-as style="proud" styledegree="1.3">
+      You
+      <break time="250ms"/>
+      are my new CTO.
+    </mstts:express-as>
+
+    <break time="800ms"/>
+
+    <mstts:express-as style="determined" styledegree="1.4">
+      Before the next season begins,
+      <break time="400ms"/>
+      you will rebuild this maison
+      <break time="350ms"/>
+      into an AI-driven Frontier Firm.
+    </mstts:express-as>
+
+    <break time="1100ms"/>
+
+    <mstts:express-as style="urgent" styledegree="1.8">
+      Five trials.
+      <break time="550ms"/>
       One season.
-      <break time="650ms"/>
+      <break time="750ms"/>
       No excuses.
     </mstts:express-as>
 

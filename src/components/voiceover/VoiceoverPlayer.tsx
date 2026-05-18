@@ -122,8 +122,8 @@ export const VoiceoverPlayer = forwardRef<VoiceoverHandle, Props>(function Voice
               transition={{ duration: 0.2 }}
               className={
                 activeCue.highlight
-                  ? 'font-brand text-[15px] tracking-[0.18em] text-gold-4 uppercase'
-                  : 'font-cn italic text-[13px] tracking-[0.04em] text-warm-1 leading-[1.6]'
+                  ? 'font-brand text-[19px] tracking-[0.18em] text-gold-4 uppercase'
+                  : 'font-cn italic text-[16px] tracking-[0.04em] text-warm-1 leading-[1.6]'
               }
             >
               {activeCue.highlight && (
