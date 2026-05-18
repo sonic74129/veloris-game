@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { CharacterLayer } from '../character/CharacterLayer';
+import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
+import { MAP_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
@@ -45,6 +47,9 @@ export function LevelMap() {
         <div className="font-cns text-[13px] text-warm-2 mt-2 max-w-[860px]">
           {stage.subtitle}
         </div>
+        {language === 'zh' && (
+          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} className="mt-3" />
+        )}
       </div>
 
       {/* Stats */}
