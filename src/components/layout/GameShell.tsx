@@ -10,13 +10,11 @@ interface GameShellProps {
   background?: string;
   /** left character zone (Miranda / advisors) */
   character?: ReactNode;
-  /** hide top status bar + bottom nav (for title screen) */
-  hideHud?: boolean;
   /** main stage content */
   children: ReactNode;
 }
 
-export function GameShell({ background, character, children, hideHud }: GameShellProps) {
+export function GameShell({ background, character, children }: GameShellProps) {
   const { scale, isMobileLandscape } = useCanvasScale();
   const isPortraitMobile = usePortraitMobile();
 
@@ -47,8 +45,8 @@ export function GameShell({ background, character, children, hideHud }: GameShel
       )}
 
       <div className="absolute inset-0 z-[5]">{children}</div>
-      {!hideHud && <TopStatusBar />}
-      {!hideHud && <BottomNav />}
+      <TopStatusBar />
+      <BottomNav />
     </div>
   );
 

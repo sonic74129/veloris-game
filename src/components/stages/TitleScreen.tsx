@@ -17,7 +17,8 @@ export function TitleScreen() {
     <AnimatePresence>
       {!exiting && (
         <motion.div
-          className="absolute inset-0 z-10 flex flex-col items-center justify-end cursor-pointer"
+          className="fixed inset-0 z-50 cursor-pointer bg-black"
+          style={{ height: '100dvh' }}
           onClick={handleStart}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -32,14 +33,14 @@ export function TitleScreen() {
             draggable={false}
           />
 
-          {/* Subtle bottom vignette so button is legible */}
+          {/* Subtle vignette so button is legible */}
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 40%)' }}
           />
 
-          {/* Start button — bottom-right */}
+          {/* Start button — bottom center, well within viewport */}
           <motion.button
-            className="relative z-10 mb-[80px] group cursor-pointer"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[15%] z-10 group cursor-pointer"
             onClick={(e) => { e.stopPropagation(); handleStart(); }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -47,11 +48,10 @@ export function TitleScreen() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            <div className="px-14 py-4 border border-white/40 group-hover:border-white/80
+            <div className="px-10 py-3 sm:px-14 sm:py-4 border border-white/40 group-hover:border-white/80
                             bg-black/30 group-hover:bg-black/50 backdrop-blur-sm
-                            transition-all duration-500 frame-corners relative">
-              <span className="c-tl" /><span className="c-br" />
-              <span className="font-cns text-[15px] tracking-[0.35em] text-white/90
+                            transition-all duration-500 rounded">
+              <span className="font-cns text-[13px] sm:text-[15px] tracking-[0.35em] text-white/90
                                group-hover:text-white transition-colors">
                 开始试炼
               </span>
@@ -60,8 +60,8 @@ export function TitleScreen() {
 
           {/* Hint text */}
           <motion.div
-            className="absolute bottom-[30px] left-1/2 -translate-x-1/2
-                        font-mono text-[9px] tracking-[0.3em] text-white/30 z-10"
+            className="absolute bottom-[6%] left-1/2 -translate-x-1/2
+                        font-mono text-[8px] sm:text-[9px] tracking-[0.3em] text-white/30 z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1.2 }}

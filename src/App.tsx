@@ -26,5 +26,10 @@ export default function App() {
     }
   };
 
-  return <GameShell hideHud={currentStageId === 'title'}>{render()}</GameShell>;
+  /* Title screen bypasses GameShell canvas — renders full-viewport directly */
+  if (currentStageId === 'title') {
+    return <TitleScreen />;
+  }
+
+  return <GameShell>{render()}</GameShell>;
 }
