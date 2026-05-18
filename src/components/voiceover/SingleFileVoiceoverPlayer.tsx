@@ -52,7 +52,11 @@ export function SingleFileVoiceoverPlayer({
     if (!el) return;
     setStatus('playing');
     document.dispatchEvent(new CustomEvent('veloris:vo:start'));
-    el.play().catch(() => setStatus('blocked'));
+    el.play().catch(() => {
+      setStatus('blocked');
+      // Restore BGM — play was blocked so vo:end will never fire naturally
+      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+    });
   }, []);
 
   const replay = useCallback(() => {
@@ -63,7 +67,10 @@ export function SingleFileVoiceoverPlayer({
     setStatus('playing');
     setActiveCue(null);
     document.dispatchEvent(new CustomEvent('veloris:vo:start'));
-    el.play().catch(() => setStatus('blocked'));
+    el.play().catch(() => {
+      setStatus('blocked');
+      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+    });
   }, [status, storageKey]);
 
   const skip = useCallback(() => {
@@ -124,6 +131,12 @@ export function SingleFileVoiceoverPlayer({
       el.removeEventListener('timeupdate', handleTimeUpdate);
       el.removeEventListener('ended',      handleEnded);
       el.removeEventListener('error',      handleError);
+      // If unmounted while playing, restore BGM
+      if (!el.paused) {
+        el.pause();
+        document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+        document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
+      }
     };
   }, [autoPlay, cues, startPlay, storageKey, onEnded]);
 
