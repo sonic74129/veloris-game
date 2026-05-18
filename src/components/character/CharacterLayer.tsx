@@ -9,12 +9,15 @@ interface CharacterLayerProps {
   miranda?: boolean;
   advisors?: boolean | 'small' | 'large';
   variant?: 'left' | 'left-large' | 'hero' | 'side';
+  /** Override the lead-character image while keeping Miranda's slot dimensions. */
+  lead?: 'miranda' | 'kinky' | 'lily';
 }
 
 export function CharacterLayer({
   miranda = true,
   advisors = false,
   variant = 'left',
+  lead = 'miranda',
 }: CharacterLayerProps) {
   const mirandaStyle =
     variant === 'hero'
@@ -25,6 +28,17 @@ export function CharacterLayer({
       ? { left: 30, top: 120, width: 280, height: 600 }
       : { left: 50, top: 120, width: 360, height: 700 };
 
+  // For non-Miranda leads, use height + auto width so aspect ratio stays correct
+  // and Kinky/Lily render at a consistent visual size regardless of source.
+  const leadSrc =
+    lead === 'kinky' ? `${BASE}assets/characters/kinky2.png`
+    : lead === 'lily'  ? `${BASE}assets/characters/lily.png`
+    : `${BASE}assets/characters/Miranda.png`;
+  const leadAlt = lead === 'kinky' ? 'Kinky' : lead === 'lily' ? 'Lily' : 'Miranda';
+  const leadStyle: React.CSSProperties = lead === 'miranda'
+    ? mirandaStyle
+    : { left: mirandaStyle.left, top: mirandaStyle.top, height: mirandaStyle.height, width: 'auto' };
+
   const advisorMode: 'small' | 'large' | false =
     advisors === true ? 'large' : advisors || false;
 
@@ -32,11 +46,11 @@ export function CharacterLayer({
     <>
       {miranda && (
         <img
-          src={`${BASE}assets/characters/Miranda.png`}
-          alt="Miranda"
+          src={leadSrc}
+          alt={leadAlt}
           style={{
             position: 'absolute',
-            ...mirandaStyle,
+            ...leadStyle,
             objectFit: 'contain',
             objectPosition: 'top',
             filter: 'drop-shadow(0 30px 40px rgba(0,0,0,0.7))',
