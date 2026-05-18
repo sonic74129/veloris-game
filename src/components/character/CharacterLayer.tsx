@@ -46,30 +46,28 @@ export function CharacterLayer({
 
       {advisorMode === 'large' && (
         <>
-          {/* Kinky — center-left, mid-foreground */}
+          {/* Kinky & Lily — fixed height + auto width so both render visually
+              the same size regardless of source aspect ratio. */}
           <img
             src={`${BASE}assets/characters/kinky2.png`}
             alt="Kinky"
             style={{
               position: 'absolute',
-              left: 540, bottom: 70,
-              width: 360, height: 760,
-              objectFit: 'contain',
-              objectPosition: 'bottom',
+              left: 620, bottom: 340,
+              height: 640,
+              width: 'auto',
               filter: 'drop-shadow(0 24px 36px rgba(0,0,0,0.65))',
               zIndex: 2,
             }}
           />
-          {/* Lily — center-right */}
           <img
             src={`${BASE}assets/characters/lily.png`}
             alt="Lily"
             style={{
               position: 'absolute',
-              left: 820, bottom: 70,
-              width: 360, height: 760,
-              objectFit: 'contain',
-              objectPosition: 'bottom',
+              left: 1080, bottom: 340,
+              height: 640,
+              width: 'auto',
               filter: 'drop-shadow(0 24px 36px rgba(0,0,0,0.65))',
               zIndex: 3,
             }}

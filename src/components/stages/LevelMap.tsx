@@ -29,11 +29,11 @@ export function LevelMap() {
 
   return (
     <>
-      <CharacterLayer variant="side" advisors="large" />
+      <CharacterLayer miranda={false} advisors="large" />
 
       {/* Header */}
-      <div className={`absolute right-[40px] ${
-        isMobile ? 'top-[55px] left-[280px]' : 'top-[100px] left-[340px]'
+      <div className={`absolute right-[40px] z-[6] ${
+        isMobile ? 'top-[55px] left-[40px]' : 'top-[100px] left-[60px]'
       }`}>
         <div className="eyebrow">SCENE · 02 · LEVEL MAP</div>
         <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
@@ -121,13 +121,13 @@ export function LevelMap() {
                     <LockIcon />
                   )}
                 </div>
-                <div className="font-cns text-[14px] text-warm-1 font-medium text-center mt-1">
+                <div className="font-cns text-[16px] text-warm-1 font-medium text-center mt-1">
                   {node.title}
                 </div>
-                <div className="font-cns text-[11px] text-warm-3 text-center mt-1 leading-tight">
+                <div className="font-cns text-[13px] text-warm-2 text-center mt-1 leading-tight">
                   {node.subtitle}
                 </div>
-                <div className="font-mono text-[9px] tracking-[0.28em] text-gold-3 mt-2">
+                <div className="font-mono text-[11px] tracking-[0.28em] text-gold-4 mt-2">
                   STAGE · 0{idx + 1}
                 </div>
               </motion.button>
