@@ -47,7 +47,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
     <>
       <CharacterLayer
         variant="side"
-        lead={stage.stageNumber % 2 === 1 ? 'kinky' : 'lily'}
+        lead={(stage.stageNumber ?? 1) % 2 === 1 ? 'kinky' : 'lily'}
       />
 
       <div className={`absolute flex gap-6 ${
