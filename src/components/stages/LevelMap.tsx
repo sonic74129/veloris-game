@@ -31,23 +31,31 @@ export function LevelMap() {
     <>
       {!isMobile && <CharacterLayer variant="side" advisors="large" />}
 
-      <div className={`absolute top-[100px] right-[60px] ${isMobile ? 'left-[40px]' : 'left-[340px]'}`}>
+      {/* Header */}
+      <div className={`absolute right-[40px] ${
+        isMobile ? 'top-[55px] left-[30px]' : 'top-[100px] left-[340px]'
+      }`}>
         <div className="eyebrow">SCENE · 02 · LEVEL MAP</div>
-        <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
+        <div className={`font-cn tracking-[0.1em] text-warm-1 leading-tight mt-1 ${
+          isMobile ? 'text-[32px]' : 'text-[40px]'
+        }`}>
           {stage.title}
         </div>
-        <div className="font-brand text-[12px] tracking-[0.36em] text-gold-3 mt-3">
-          KINKY & LILY · FIVE-STAGE TRANSFORMATION BLUEPRINT
-        </div>
-        <div className="font-cns text-[13px] text-warm-2 mt-2 max-w-[860px]">
-          {stage.subtitle}
-        </div>
+        {!isMobile && (
+          <>
+            <div className="font-brand text-[12px] tracking-[0.36em] text-gold-3 mt-3">
+              KINKY & LILY · FIVE-STAGE TRANSFORMATION BLUEPRINT
+            </div>
+            <div className="font-cns text-[13px] text-warm-2 mt-2 max-w-[860px]">
+              {stage.subtitle}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className={`absolute z-[6] ${isMobile
-        ? 'left-[40px] top-[260px] right-[40px] flex gap-4'
-        : 'right-[60px] top-[260px] w-[260px] flex flex-col gap-3'
-      }`}>
+      {/* Stats — hide on mobile */}
+      {!isMobile && (
+      <div className="absolute right-[60px] top-[260px] w-[260px] flex flex-col gap-3 z-[6]">
         <div className="glass p-4 frame-corners relative">
           <span className="c-tl" /><span className="c-br" />
           <div className="eyebrow mb-2">{ui.mapSide.progress}</div>
@@ -73,9 +81,15 @@ export function LevelMap() {
           <div className="font-cns text-[12px] text-gold-4">高阶影响力 +10</div>
         </div>
       </div>
+      )}
 
-      <div className="absolute left-[60px] right-[60px] bottom-[110px] z-[6]">
-        <div className="grid grid-cols-5 gap-4 relative">
+      {/* Stage nodes */}
+      <div className={`absolute z-[6] ${
+        isMobile
+          ? 'left-[30px] right-[30px] top-[150px] bottom-[52px]'
+          : 'left-[60px] right-[60px] bottom-[110px]'
+      }`}>
+        <div className={`grid gap-4 relative ${isMobile ? 'grid-cols-5' : 'grid-cols-5'}`}>
           <div className="absolute top-[60px] left-[4%] right-[4%] h-px
                           bg-gradient-to-r from-transparent via-gold-2 to-transparent" />
           {MAP_NODES.map((node, idx) => {
@@ -134,9 +148,11 @@ export function LevelMap() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => goToStage(nextStage)}
-            className="px-10 py-3.5 bg-gold-3 hover:bg-gold-4 text-ink-0
-                       font-cns font-medium tracking-[0.24em] text-[13px]
-                       shadow-gold-glow transition-colors"
+            className={`bg-gold-3 hover:bg-gold-4 text-ink-0
+                       font-cns font-medium tracking-[0.24em]
+                       shadow-gold-glow transition-colors ${
+                         isMobile ? 'px-8 py-3 text-[16px]' : 'px-10 py-3.5 text-[13px]'
+                       }`}
           >
             开始第 {nextStage.replace('stage', '')} 关 →
           </motion.button>

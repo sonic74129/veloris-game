@@ -20,13 +20,17 @@ export function MissionBriefing({ stage }: Props) {
     <>
       {!isMobile && <CharacterLayer variant="left-large" />}
 
-      <div className={`absolute top-[110px] right-[60px] bottom-[100px] flex gap-8 ${isMobile ? 'left-[40px]' : 'left-[540px]'}`}>
+      <div className={`absolute flex gap-8 ${
+        isMobile
+          ? 'top-[60px] left-[30px] right-[30px] bottom-[55px] flex-col'
+          : 'top-[110px] left-[540px] right-[60px] bottom-[100px]'
+      }`}>
         {/* Center: header + challenge */}
-        <div className="flex-1 flex flex-col gap-5">
+        <div className="flex-1 flex flex-col gap-5 overflow-y-auto">
           <StageHeader
             eyebrow="SCENE · 00"
             title={stage.title}
-            brandLine="MIRANDA'S CHALLENGE — MISSION BRIEFING"
+            brandLine={isMobile ? undefined : "MIRANDA'S CHALLENGE — MISSION BRIEFING"}
             subtitle={stage.subtitle}
           />
           <div className="mt-2">
@@ -42,15 +46,18 @@ export function MissionBriefing({ stage }: Props) {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => goToStage('map')}
-            className="self-start mt-2 px-10 py-3.5 bg-gold-3 hover:bg-gold-4 text-ink-0
-                       font-cns font-medium tracking-[0.24em] text-[13px]
-                       shadow-gold-glow transition-colors"
+            className={`self-start mt-2 bg-gold-3 hover:bg-gold-4 text-ink-0
+                       font-cns font-medium tracking-[0.24em]
+                       shadow-gold-glow transition-colors ${
+                         isMobile ? 'px-8 py-3 text-[16px]' : 'px-10 py-3.5 text-[13px]'
+                       }`}
           >
             {ui.buttons.start} →
           </motion.button>
         </div>
 
-        {/* Right: mission objectives */}
+        {/* Right: mission objectives (desktop only) */}
+        {!isMobile && (
         <div className="w-[360px] flex flex-col gap-4">
           <MissionPanel
             title={ui.panels.mission}
@@ -71,6 +78,7 @@ export function MissionBriefing({ stage }: Props) {
             </div>
           )}
         </div>
+        )}
       </div>
     </>
   );

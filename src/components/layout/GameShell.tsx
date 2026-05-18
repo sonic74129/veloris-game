@@ -20,10 +20,10 @@ export function GameShell({ background, character, children }: GameShellProps) {
 
   if (isPortraitMobile) return <RotatePrompt />;
 
-  /* ---------- canvas block shared by both layouts ---------- */
+  /* ---------- canvas block ---------- */
   const canvasBlock = (
     <div
-      className={`canvas-1920 ${isMobileLandscape ? 'origin-top-left absolute top-0 left-0' : 'origin-center'}`}
+      className="canvas-1920 origin-center"
       style={{ transform: `scale(${scale})` }}
     >
       {background && (
@@ -50,25 +50,8 @@ export function GameShell({ background, character, children }: GameShellProps) {
     </div>
   );
 
-  if (isMobileLandscape) {
-    /* Width-fit scale, overflow-hidden wrapper clips the oversized layout box,
-       page scrolls if scaled canvas is taller than viewport. */
-    const vw = Math.round(1920 * scale);
-    const vh = Math.round(1080 * scale);
-    return (
-      <MobileContext.Provider value={true}>
-        <div className="w-screen bg-black overflow-x-hidden" style={{ height: vh }}>
-          <div className="relative overflow-hidden" style={{ width: vw, height: vh }}>
-            {canvasBlock}
-          </div>
-        </div>
-      </MobileContext.Provider>
-    );
-  }
-
-  /* Desktop / large-screen letterbox */
   return (
-    <MobileContext.Provider value={false}>
+    <MobileContext.Provider value={isMobileLandscape}>
       <div className="w-screen h-screen flex items-center justify-center bg-black overflow-hidden">
         {canvasBlock}
       </div>
