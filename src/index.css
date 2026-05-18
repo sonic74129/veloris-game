@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes shimmer-sweep {
+  0%   { background-position: 200% center; }
+  100% { background-position: -50% center; }
+}
+
+/* Voiceover subtitle shimmer — warm tone (regular speaker) */
+.subtitle-shimmer {
+  background: linear-gradient(105deg,
+    #d4c4a0 20%, #fff8ee 42%, #fffdf8 50%, #e8d8b4 58%, #c4b080 80%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-sweep 3.5s linear infinite;
+}
+
+/* Voiceover subtitle shimmer — gold (emphasis speaker) */
+.subtitle-shimmer-gold {
+  background: linear-gradient(105deg,
+    #b8912a 15%, #f5e18a 38%, #fffce0 50%, #c9a84c 62%, #8a6a1a 85%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-sweep 2.8s linear infinite;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap');
 
 html, body, #root {

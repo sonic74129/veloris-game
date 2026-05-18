@@ -134,7 +134,7 @@ export function SingleFileVoiceoverPlayer({
       />
 
       {/* ── Subtitle ──────────────────────────────────────────────────────── */}
-      <div className="min-h-[32px] flex items-center">
+      <div className="min-h-[52px] flex items-center">
         <AnimatePresence mode="wait">
           {status === 'playing' && activeCue && (
             <motion.div
@@ -143,16 +143,20 @@ export function SingleFileVoiceoverPlayer({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18 }}
-              className={
-                isEmphasis
-                  ? 'font-brand uppercase tracking-[0.2em] text-[19px] text-gold-4'
-                  : 'font-cn italic text-[16px] tracking-[0.04em] text-warm-1 leading-[1.6]'
-              }
+              className="flex items-baseline gap-2"
             >
               {isEmphasis && (
-                <span className="mr-2 text-gold-3 text-[10px] font-mono not-italic">▶</span>
+                <span className="text-gold-3 text-[11px] font-mono flex-shrink-0">▶</span>
               )}
-              {activeCue.text}
+              <span
+                className={
+                  isEmphasis
+                    ? 'font-brand uppercase tracking-[0.2em] text-[22px] subtitle-shimmer-gold'
+                    : 'font-cn italic text-[19px] tracking-[0.04em] leading-[1.6] subtitle-shimmer'
+                }
+              >
+                {activeCue.text}
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
