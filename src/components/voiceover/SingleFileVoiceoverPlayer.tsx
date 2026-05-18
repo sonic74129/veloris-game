@@ -43,6 +43,7 @@ export function SingleFileVoiceoverPlayer({
     const el = audioRef.current;
     if (!el) return;
     setStatus('playing');
+    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
     el.play().catch(() => setStatus('blocked'));
   }, []);
 
@@ -53,6 +54,7 @@ export function SingleFileVoiceoverPlayer({
     el.currentTime = 0;
     setStatus('playing');
     setActiveCue(null);
+    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
     el.play().catch(() => setStatus('blocked'));
   }, [status, storageKey]);
 
@@ -62,6 +64,7 @@ export function SingleFileVoiceoverPlayer({
     setStatus('ended');
     setActiveCue(null);
     localStorage.setItem(storageKey, '1');
+    document.dispatchEvent(new CustomEvent('veloris:vo:end'));
     onEnded?.();
   }, [storageKey, onEnded]);
 
@@ -86,6 +89,7 @@ export function SingleFileVoiceoverPlayer({
       setStatus('ended');
       setActiveCue(null);
       localStorage.setItem(storageKey, '1');
+      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
       onEnded?.();
     };
 

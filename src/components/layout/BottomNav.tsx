@@ -65,20 +65,59 @@ function LangToggle({ current, onChange }: { current: Language; onChange: (l: La
 }
 
 const BGM_URL = import.meta.env.BASE_URL + 'assets/bgm.mp3';
+const BGM_MUTED_KEY = 'veloris:bgm:muted';
+const BGM_FULL   = 0.35;
+const BGM_DUCKED = 0.07;
+
+function fadeBgm(audio: HTMLAudioElement, target: number, ms = 700) {
+  const start = audio.volume;
+  const steps = 30;
+  const delta = (target - start) / steps;
+  let i = 0;
+  const id = setInterval(() => {
+    i++;
+    audio.volume = Math.min(1, Math.max(0, start + delta * i));
+    if (i >= steps) clearInterval(id);
+  }, ms / steps);
+}
 
 function BgmToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const startedRef = useRef(false);
   const [playing, setPlaying] = useState(false);
-  const [_, setReady] = useState(false);
 
   useEffect(() => {
     const audio = new Audio(BGM_URL);
     audio.loop = true;
-    audio.volume = 0.35;
+    audio.volume = BGM_FULL;
     audio.preload = 'auto';
     audioRef.current = audio;
-    audio.addEventListener('canplaythrough', () => setReady(true), { once: true });
-    return () => { audio.pause(); audio.src = ''; };
+
+    // Auto-start on first user interaction, unless user previously muted
+    const tryStart = () => {
+      if (startedRef.current) return;
+      if (localStorage.getItem(BGM_MUTED_KEY) === '1') return;
+      startedRef.current = true;
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+    };
+
+    document.addEventListener('click',   tryStart, { once: true });
+    document.addEventListener('keydown', tryStart, { once: true });
+
+    // Duck BGM when voiceover plays, restore when done
+    const onVoStart = () => fadeBgm(audio, BGM_DUCKED);
+    const onVoEnd   = () => fadeBgm(audio, BGM_FULL);
+    document.addEventListener('veloris:vo:start', onVoStart);
+    document.addEventListener('veloris:vo:end',   onVoEnd);
+
+    return () => {
+      document.removeEventListener('click',           tryStart);
+      document.removeEventListener('keydown',         tryStart);
+      document.removeEventListener('veloris:vo:start', onVoStart);
+      document.removeEventListener('veloris:vo:end',   onVoEnd);
+      audio.pause();
+      audio.src = '';
+    };
   }, []);
 
   const toggle = useCallback(() => {
@@ -87,8 +126,10 @@ function BgmToggle() {
     if (playing) {
       audio.pause();
       setPlaying(false);
+      localStorage.setItem(BGM_MUTED_KEY, '1');
     } else {
       audio.play().then(() => setPlaying(true)).catch(() => {});
+      localStorage.removeItem(BGM_MUTED_KEY);
     }
   }, [playing]);
 
