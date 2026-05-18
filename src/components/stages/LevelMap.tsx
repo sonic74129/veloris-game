@@ -47,9 +47,6 @@ export function LevelMap() {
         <div className="font-cns text-[13px] text-warm-2 mt-2 max-w-[860px]">
           {stage.subtitle}
         </div>
-        {language === 'zh' && (
-          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} className="mt-3" />
-        )}
       </div>
 
       {/* Stats */}
@@ -79,6 +76,13 @@ export function LevelMap() {
           <div className="font-cns text-[12px] text-gold-4">高阶影响力 +10</div>
         </div>
       </div>
+
+      {/* Speech bubble — voiceover overlay, centered between characters */}
+      {language === 'zh' && (
+        <div className="absolute z-[7]" style={{ left: 580, right: 480, bottom: 125 }}>
+          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble />
+        </div>
+      )}
 
       {/* Stage nodes */}
       <div className={`absolute z-[6] ${
