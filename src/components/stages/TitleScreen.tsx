@@ -40,7 +40,7 @@ export function TitleScreen() {
 
           {/* Start button — bottom center, well within viewport */}
           <motion.button
-            className="absolute left-1/2 -translate-x-1/2 bottom-[15%] z-10 group cursor-pointer"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[4%] z-10 group cursor-pointer"
             onClick={(e) => { e.stopPropagation(); handleStart(); }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -60,7 +60,7 @@ export function TitleScreen() {
 
           {/* Hint text */}
           <motion.div
-            className="absolute bottom-[6%] left-1/2 -translate-x-1/2
+            className="absolute bottom-[1%] left-1/2 -translate-x-1/2
                         font-mono text-[8px] sm:text-[9px] tracking-[0.3em] text-white/30 z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

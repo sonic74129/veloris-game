@@ -1,3 +1,5 @@
+const BASE = import.meta.env.BASE_URL;
+
 /**
  * Character layer.
  * Miranda on left as tall portrait; Kinky / Lily as advisors.
@@ -30,7 +32,7 @@ export function CharacterLayer({
     <>
       {miranda && (
         <img
-          src="/assets/characters/Miranda.png"
+          src={`${BASE}assets/characters/Miranda.png`}
           alt="Miranda"
           style={{
             position: 'absolute',
@@ -46,7 +48,7 @@ export function CharacterLayer({
         <>
           {/* Kinky — center-left, mid-foreground */}
           <img
-            src="/assets/characters/kinky2.png"
+            src={`${BASE}assets/characters/kinky2.png`}
             alt="Kinky"
             style={{
               position: 'absolute',
@@ -60,7 +62,7 @@ export function CharacterLayer({
           />
           {/* Lily — center-right */}
           <img
-            src="/assets/characters/lily.png"
+            src={`${BASE}assets/characters/lily.png`}
             alt="Lily"
             style={{
               position: 'absolute',
@@ -78,11 +80,11 @@ export function CharacterLayer({
       {advisorMode === 'small' && (
         <>
           <AdvisorChip
-            src="/assets/characters/kinky2.png" name="KINKY"
+            src={`${BASE}assets/characters/kinky2.png`} name="KINKY"
             role="Strategy"  left={60} bottom={110}
           />
           <AdvisorChip
-            src="/assets/characters/lily.png" name="LILY"
+            src={`${BASE}assets/characters/lily.png`} name="LILY"
             role="Ops"       left={210} bottom={110}
           />
         </>
