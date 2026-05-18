@@ -52,7 +52,7 @@ export function initBgm(
     a.play().then(() => _onStateChange?.(true)).catch(() => {});
   };
 
-  document.addEventListener('click',   tryStart, { once: true });
+  document.addEventListener('click',   tryStart, { once: true, capture: true });
   document.addEventListener('keydown', tryStart, { once: true });
 
   const onVoStart = () => fade(BGM_DUCKED);
@@ -61,7 +61,7 @@ export function initBgm(
   document.addEventListener('veloris:vo:end',   onVoEnd);
 
   return () => {
-    document.removeEventListener('click',            tryStart);
+    document.removeEventListener('click',            tryStart, { capture: true });
     document.removeEventListener('keydown',          tryStart);
     document.removeEventListener('veloris:vo:start', onVoStart);
     document.removeEventListener('veloris:vo:end',   onVoEnd);
