@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { useMobile } from '../../lib/mobile';
 import type { Language } from '../../data/types';
 
 export function BottomNav() {
@@ -19,31 +18,6 @@ export function BottomNav() {
     { key: 'roadmap', label: ui.nav.roadmap, onClick: () => goToStage('map') },
     { key: 'settings', label: ui.nav.settings },
   ];
-
-  const isMobile = useMobile();
-
-  if (isMobile) {
-    return (
-      <nav className="absolute bottom-0 left-0 right-0 h-[48px] flex items-center
-                      px-5 z-30 bg-gradient-to-t from-ink-0/95 to-transparent
-                      pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <button onClick={() => goToStage('mission')}
-                  className="px-3 py-1 font-cns text-[16px] text-warm-2 hover:text-gold-4">
-            {ui.nav.warRoom}
-          </button>
-          <button onClick={() => goToStage('map')}
-                  className="px-3 py-1 font-cns text-[16px] text-warm-2 hover:text-gold-4">
-            {ui.nav.roadmap}
-          </button>
-        </div>
-        <div className="ml-auto flex items-center gap-2 pointer-events-auto">
-          <BgmToggle />
-          <LangToggle current={language} onChange={setLanguage} />
-        </div>
-      </nav>
-    );
-  }
 
   return (
     <nav className="absolute bottom-0 left-0 right-0 h-[68px] flex items-center

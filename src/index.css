@@ -11,6 +11,15 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   overflow: hidden; height: 100%; width: 100%;
 }
+/* Mobile landscape: allow vertical scroll, prevent horizontal */
+@media (orientation: landscape) and (max-height: 560px) {
+  html, body, #root {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100%;
+  }
+}
 
 .canvas-1920 {
   width: 1920px; height: 1080px;

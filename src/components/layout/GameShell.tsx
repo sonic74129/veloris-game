@@ -20,12 +20,9 @@ export function GameShell({ background, character, children }: GameShellProps) {
 
   if (isPortraitMobile) return <RotatePrompt />;
 
-  /* ---------- canvas block ---------- */
-  const canvasBlock = (
-    <div
-      className="canvas-1920 origin-center"
-      style={{ transform: `scale(${scale})` }}
-    >
+  /* ---------- canvas content ---------- */
+  const canvasContent = (
+    <>
       {background && (
         <div
           className="absolute inset-0 z-0 opacity-40"
@@ -40,20 +37,40 @@ export function GameShell({ background, character, children }: GameShellProps) {
       <div className="absolute inset-0 z-[1] pointer-events-none
                       bg-gradient-to-b from-ink-0/40 via-transparent to-ink-0/80" />
 
-      {character && !isMobileLandscape && (
+      {character && (
         <div className="absolute inset-0 z-[2] pointer-events-none">{character}</div>
       )}
 
       <div className="absolute inset-0 z-[5]">{children}</div>
       <TopStatusBar />
       <BottomNav />
-    </div>
+    </>
   );
 
+  if (isMobileLandscape) {
+    const visualH = Math.round(1080 * scale);
+    return (
+      <MobileContext.Provider value={true}>
+        {/* Wrapper: width fills screen, height = scaled canvas. Page body scrolls if taller than viewport. */}
+        <div style={{ width: '100vw', height: visualH, position: 'relative', overflow: 'hidden' }}>
+          <div
+            className="canvas-1920 origin-top-left"
+            style={{ transform: `scale(${scale})`, position: 'absolute', top: 0, left: 0 }}
+          >
+            {canvasContent}
+          </div>
+        </div>
+      </MobileContext.Provider>
+    );
+  }
+
+  /* Desktop / large-screen letterbox */
   return (
-    <MobileContext.Provider value={isMobileLandscape}>
+    <MobileContext.Provider value={false}>
       <div className="w-screen h-screen flex items-center justify-center bg-black overflow-hidden">
-        {canvasBlock}
+        <div className="canvas-1920 origin-center" style={{ transform: `scale(${scale})` }}>
+          {canvasContent}
+        </div>
       </div>
     </MobileContext.Provider>
   );

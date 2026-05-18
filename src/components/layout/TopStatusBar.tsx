@@ -1,6 +1,5 @@
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { useMobile } from '../../lib/mobile';
 
 export function TopStatusBar() {
   const language = useGameState((s) => s.language);
@@ -8,23 +7,6 @@ export function TopStatusBar() {
   const energy = useGameState((s) => s.energy);
   const completed = useGameState((s) => s.completedStages.length);
   const ui = packs[language].ui;
-  const isMobile = useMobile();
-
-  if (isMobile) {
-    return (
-      <header className="absolute top-0 left-0 right-0 h-[52px] flex items-center px-5 z-30
-                         bg-gradient-to-b from-ink-0/95 to-transparent pointer-events-none">
-        <div className="font-brand text-[18px] tracking-[0.25em] text-gold-4 pointer-events-auto">
-          {ui.brand}
-        </div>
-        <div className="flex-1" />
-        <div className="flex items-center gap-4 text-warm-2 pointer-events-auto">
-          <span className="font-mono text-[14px] text-warm-2">{Math.min(completed + 1, 5)}/5</span>
-          <span className="font-mono text-[14px] text-gold-4">{String(score).padStart(3, '0')}</span>
-        </div>
-      </header>
-    );
-  }
 
   return (
     <header className="absolute top-0 left-0 right-0 h-[72px] flex items-center px-9 z-30

@@ -45,11 +45,11 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
 
   return (
     <>
-      {!isMobile && <CharacterLayer variant="side" advisors="small" />}
+      <CharacterLayer variant="side" advisors="small" />
 
       <div className={`absolute flex gap-6 ${
         isMobile
-          ? 'top-[55px] left-[30px] right-[30px] bottom-[52px] flex-col'
+          ? 'top-[55px] left-[280px] right-[30px] bottom-[52px]'
           : 'top-[100px] left-[370px] right-[60px] bottom-[90px]'
       }`}>
         {/* Center column: header + slots + options */}
@@ -58,15 +58,13 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
             <StageHeader
               eyebrow={`SCENE · 0${stage.stageNumber} · STAGE`}
               title={stage.title}
-              subtitle={isMobile ? undefined : stage.subtitle}
+              subtitle={stage.subtitle}
             />
             <button
               onClick={() => resetStage(stage.id)}
-              className={`font-mono tracking-[0.28em] text-warm-3
+              className="font-mono text-[10px] tracking-[0.28em] text-warm-3
                          hover:text-gold-4 border border-warm-4 hover:border-gold-3
-                         rounded transition-colors ${
-                           isMobile ? 'text-[13px] px-2 py-1' : 'text-[10px] px-3 py-1.5'
-                         }`}
+                         px-3 py-1.5 rounded transition-colors"
             >
               ↻ {ui.buttons.reset}
             </button>
@@ -77,8 +75,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           </div>
         </div>
 
-        {/* Right column: challenge + mission (desktop only) */}
-        {!isMobile && (
+        {/* Right column: challenge + mission + knowledge + hint */}
         <div className="w-[340px] flex flex-col gap-3 overflow-y-auto pr-1">
           {stage.challenge && (
             <ChallengeCard
@@ -95,7 +92,6 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           )}
           {stage.hint && <HintPanel title={ui.panels.hint} body={stage.hint} />}
         </div>
-        )}
       </div>
 
       <StageCompleteModal

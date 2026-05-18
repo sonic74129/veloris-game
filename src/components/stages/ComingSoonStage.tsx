@@ -15,8 +15,10 @@ export function ComingSoonStage({ stage }: Props) {
 
   return (
     <>
-      {!isMobile && <CharacterLayer variant="side" advisors="small" />}
-      <div className={`absolute top-[110px] right-[60px] bottom-[100px] flex flex-col ${isMobile ? 'left-[40px]' : 'left-[370px]'}`}>
+      <CharacterLayer variant="side" advisors="small" />
+      <div className={`absolute top-[110px] right-[60px] bottom-[100px] flex flex-col ${
+        isMobile ? 'left-[280px]' : 'left-[370px]'
+      }`}>
         <StageHeader
           eyebrow={`SCENE · 0${stage.stageNumber} · STAGE`}
           title={stage.title}
