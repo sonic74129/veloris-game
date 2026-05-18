@@ -14,6 +14,7 @@ interface GameState {
   language: Language;
 
   goToStage: (id: StageId) => void;
+  goBack: () => void;
   completeStage: (id: StageId) => void;
   resetStage: (id: StageId) => void;
   setLanguage: (lang: Language) => void;
@@ -45,6 +46,12 @@ export const useGameState = create<GameState>()(
         set({ currentStageId: id });
       },
 
+      goBack: () => {
+        const idx = STAGE_ORDER.indexOf(get().currentStageId);
+        if (idx <= 0) return;
+        const prevId = STAGE_ORDER[idx - 1];
+        if (get().unlockedStages.includes(prevId)) set({ currentStageId: prevId });
+      },
       completeStage: (id) => {
         const { completedStages, unlockedStages, score } = get();
         const idx = STAGE_ORDER.indexOf(id);

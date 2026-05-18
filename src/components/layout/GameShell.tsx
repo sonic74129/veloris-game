@@ -4,6 +4,7 @@ import { MobileContext } from '../../lib/mobile';
 import { TopStatusBar } from './TopStatusBar';
 import { BottomNav } from './BottomNav';
 import { RotatePrompt } from './RotatePrompt';
+import { useGameState } from '../../hooks/useGameState';
 
 interface GameShellProps {
   /** background image url (atmosphere only — text overlays in React) */
@@ -19,6 +20,7 @@ interface GameShellProps {
 export function GameShell({ background, character, children, hideHud = false }: GameShellProps) {
   const { scale, isMobileLandscape } = useCanvasScale();
   const isPortraitMobile = usePortraitMobile();
+  const goBack = useGameState((s) => s.goBack);
 
   /* ---------- canvas content ---------- */
   const canvasContent = (
@@ -44,6 +46,17 @@ export function GameShell({ background, character, children, hideHud = false }: 
       <div className="absolute inset-0 z-[5]">{children}</div>
       {!hideHud && <TopStatusBar />}
       {!hideHud && <BottomNav />}
+      {!hideHud && (
+        <button
+          onClick={goBack}
+          className="absolute top-[82px] left-[24px] z-30 flex items-center gap-1.5
+                     font-mono text-[10px] tracking-[0.22em] text-warm-3
+                     hover:text-gold-4 transition-colors group"
+        >
+          <span className="text-[14px] leading-none transition-transform group-hover:-translate-x-0.5">‹</span>
+          BACK
+        </button>
+      )}
     </>
   );
 
