@@ -19,7 +19,7 @@ const HEELS_SRC = `${BASE_URL}audio/high-heels-walk.mp3`;
 const HEELS_VOL_LOUD = 0.6;
 const HEELS_VOL_DUCKED = 0.28;
 const HEELS_DUCK_TIME = 2.0; // seconds — dialogue begins here
-const VIDEO_VOL = 0.9;
+const VIDEO_VOL = 1.0;
 
 const FREEZE_MS = 300;
 const FADE_MS = 600;
