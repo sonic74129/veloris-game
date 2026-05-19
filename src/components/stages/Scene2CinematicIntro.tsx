@@ -10,8 +10,6 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
 
-const VIDEO_GAIN = 3.0; // amplify video audio 3x via Web Audio API
-
 const FREEZE_MS = 300;
 const FADE_MS = 600;
 const EARLY_CUT_SEC = 1.5;
@@ -35,14 +33,12 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
   const earlyCutTriggered = useRef(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Cleanup
   useEffect(() => {
     return () => {
       cancelAnimationFrame(rafRef.current);
       videoRef.current?.pause();
-      audioCtxRef.current?.close();
     };
   }, []);
 
@@ -81,19 +77,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
     const startPlayback = async () => {
       setPhase('playing');
-
-      // Amplify audio via Web Audio API GainNode (allows > 1.0 volume)
-      try {
-        const ctx = new AudioContext();
-        audioCtxRef.current = ctx;
-        const source = ctx.createMediaElementSource(video);
-        const gain = ctx.createGain();
-        gain.gain.value = VIDEO_GAIN;
-        source.connect(gain);
-        gain.connect(ctx.destination);
-      } catch {
-        // Fallback: just use normal volume
-      }
 
       try {
         await video.play();

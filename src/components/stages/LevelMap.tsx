@@ -44,6 +44,8 @@ export function LevelMap() {
   const [voiceoverReady, setVoiceoverReady] = useState(!isFirstVisit);
   useEffect(() => {
     if (!isFirstVisit) return;
+    // Clear the voiceover played flag so it always autoplays on first visit
+    localStorage.removeItem('veloris:vo:map:played');
     const timer = setTimeout(() => setVoiceoverReady(true), 2000);
     return () => clearTimeout(timer);
   }, [isFirstVisit]);
