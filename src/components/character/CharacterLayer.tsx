@@ -21,11 +21,20 @@ export function CharacterLayer({
   lead = 'miranda',
 }: CharacterLayerProps) {
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
+  const [advisorsFadedIn, setAdvisorsFadedIn] = useState(false);
   useEffect(() => {
     const handler = (e: Event) => setActiveSpeaker((e as CustomEvent<{ who: string | null }>).detail.who);
     document.addEventListener('veloris:vo:speaker', handler);
     return () => document.removeEventListener('veloris:vo:speaker', handler);
   }, []);
+  const _largeAdvisorsActive = advisors === true || advisors === 'large';
+  useEffect(() => {
+    if (_largeAdvisorsActive) {
+      const id = requestAnimationFrame(() => setAdvisorsFadedIn(true));
+      return () => cancelAnimationFrame(id);
+    }
+    setAdvisorsFadedIn(false);
+  }, [_largeAdvisorsActive]);
   const mirandaStyle =
     variant === 'hero'
       ? { left: 60, top: 90, width: 540, height: 900 }
@@ -77,10 +86,11 @@ export function CharacterLayer({
               left: 700, bottom: 340,
               height: 640,
               width: 'auto',
+              opacity: advisorsFadedIn ? 1 : 0,
               filter: activeSpeaker === 'kinky'
                 ? 'drop-shadow(0 0 18px rgba(201,168,76,0.85)) drop-shadow(0 24px 36px rgba(0,0,0,0.65))'
                 : 'drop-shadow(0 24px 36px rgba(0,0,0,0.65))',
-              transition: 'filter 0.3s ease',
+              transition: 'filter 0.3s ease, opacity 400ms ease',
               zIndex: 2,
             }}
           />
@@ -92,10 +102,11 @@ export function CharacterLayer({
               left: 1080, bottom: 340,
               height: 640,
               width: 'auto',
+              opacity: advisorsFadedIn ? 1 : 0,
               filter: activeSpeaker === 'lily'
                 ? 'drop-shadow(0 0 18px rgba(139,196,240,0.85)) drop-shadow(0 24px 36px rgba(0,0,0,0.65))'
                 : 'drop-shadow(0 24px 36px rgba(0,0,0,0.65))',
-              transition: 'filter 0.3s ease',
+              transition: 'filter 0.3s ease, opacity 400ms ease',
               zIndex: 3,
             }}
           />
