@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
@@ -39,6 +39,14 @@ export function LevelMap() {
   const handleCinematicComplete = useCallback(() => {
     setCinematicPhase('done');
   }, []);
+
+  // Delay voiceover by 2s on first visit (wait for video to play a bit first)
+  const [voiceoverReady, setVoiceoverReady] = useState(!isFirstVisit);
+  useEffect(() => {
+    if (!isFirstVisit) return;
+    const timer = setTimeout(() => setVoiceoverReady(true), 2000);
+    return () => clearTimeout(timer);
+  }, [isFirstVisit]);
 
   // Characters hidden while video is visible (playing or freezing)
   const showCharacters = cinematicPhase === 'done';
@@ -100,8 +108,8 @@ export function LevelMap() {
         </div>
       </div>
 
-      {/* Speech bubble — voiceover overlay, only after cinematic is done */}
-      {language === 'zh' && cinematicPhase === 'done' && !isFirstVisit && (
+      {/* Speech bubble — voiceover (delayed 2s on first visit) */}
+      {language === 'zh' && voiceoverReady && (
         <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble />
         </div>

@@ -1,24 +1,20 @@
 /**
  * Scene2CinematicIntro — In-place video at the Kinky/Lily character position.
  *
- * Video has high-heels sound embedded. Dialogue (kinky-lily-map-zh.mp3) starts 2s after video.
- * Video fades to black early (EARLY_CUT_SEC before end).
+ * Video has high-heels sound embedded. Fades to black early (EARLY_CUT_SEC before end).
+ * Dialogue is handled separately by SingleFileVoiceoverPlayer in LevelMap (delayed 2s).
  */
 
 import { useRef, useCallback, useEffect, useState } from 'react';
 
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
-const DIALOGUE_SRC = `${BASE_URL}audio/kinky-lily-map-zh.mp3`;
 
-// Volumes
 const VIDEO_VOL = 1.0;
-const DIALOGUE_VOL = 1.0;
-const DIALOGUE_DELAY = 2.0; // seconds after video starts
 
 const FREEZE_MS = 300;
 const FADE_MS = 600;
-const EARLY_CUT_SEC = 1.5; // start fade-to-black this many seconds before video end
+const EARLY_CUT_SEC = 1.5;
 
 export type CinematicPhase = 'idle' | 'playing' | 'freezing' | 'done';
 
@@ -36,34 +32,28 @@ interface Props {
 export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const [phase, setPhase] = useState<CinematicPhase>('idle');
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const dialogueRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
-  const dialogueStarted = useRef(false);
   const earlyCutTriggered = useRef(false);
 
   // Cleanup
   useEffect(() => {
     return () => {
       cancelAnimationFrame(rafRef.current);
-      dialogueRef.current?.pause();
       videoRef.current?.pause();
     };
   }, []);
 
-  // RAF loop: start dialogue at 2s, handle early cut
+  // RAF loop: handle early cut (fade to black before video end)
   const startLoop = useCallback(() => {
     const tick = () => {
       const v = videoRef.current;
       if (!v || v.paused) return;
-      const t = v.currentTime;
-      const remaining = durationRef.current - t;
+      const remaining = durationRef.current - v.currentTime;
 
-      // Early cut: trigger ending sequence before video finishes
       if (remaining <= EARLY_CUT_SEC && !earlyCutTriggered.current) {
         earlyCutTriggered.current = true;
         v.pause();
-        dialogueRef.current?.pause();
         cancelAnimationFrame(rafRef.current);
         setPhase('freezing');
         setTimeout(() => {
@@ -73,28 +63,12 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         return;
       }
 
-      // Start dialogue at DIALOGUE_DELAY seconds
-      if (t >= DIALOGUE_DELAY && !dialogueStarted.current) {
-        dialogueStarted.current = true;
-        const d = dialogueRef.current;
-        if (d) {
-          d.volume = DIALOGUE_VOL;
-          d.play().catch(() => {});
-        }
-      }
-
-      // Fade dialogue out near end
-      const d = dialogueRef.current;
-      if (d && dialogueStarted.current && remaining <= 1.0 + EARLY_CUT_SEC) {
-        d.volume = Math.max(0, DIALOGUE_VOL * ((remaining - EARLY_CUT_SEC) / 1.0));
-      }
-
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
   }, [onComplete]);
 
-  // Start playback — wait for video to be ready before calling play()
+  // Start playback
   useEffect(() => {
     if (!trigger || phase !== 'idle') return;
     const video = videoRef.current;
@@ -104,13 +78,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     video.muted = false;
 
     const startPlayback = async () => {
-      // Preload dialogue audio
-      const dialogue = new Audio(DIALOGUE_SRC);
-      dialogue.preload = 'auto';
-      dialogueRef.current = dialogue;
-
       setPhase('playing');
-
       try {
         await video.play();
       } catch {
@@ -118,11 +86,9 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         onComplete();
         return;
       }
-
       startLoop();
     };
 
-    // If video is already ready, start immediately; otherwise wait for canplay
     if (video.readyState >= 3) {
       startPlayback();
     } else {
@@ -132,7 +98,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       };
       video.addEventListener('canplay', onCanPlay);
 
-      // Timeout fallback — if video doesn't load in 5s, skip cinematic
       const timeout = setTimeout(() => {
         video.removeEventListener('canplay', onCanPlay);
         if (phase === 'idle') {
@@ -155,7 +120,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const handleError = useCallback(() => {
     if (phase !== 'done') {
       cancelAnimationFrame(rafRef.current);
-      dialogueRef.current?.pause();
       setPhase('done');
       onComplete();
     }
@@ -163,8 +127,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
   const handleEnded = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
-    dialogueRef.current?.pause();
-
     setPhase('freezing');
     setTimeout(() => {
       setPhase('done');
