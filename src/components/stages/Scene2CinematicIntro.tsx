@@ -1,25 +1,20 @@
 /**
  * Scene2CinematicIntro — In-place video at the Kinky/Lily character position.
  *
- * NOT a full-screen overlay. The video sits at z-index 1 (behind everything),
- * exactly where the static character images normally appear.
- * While video plays, static characters are hidden.
- * When video ends, video fades out and static characters fade in.
- *
- * Audio: original video dialogue (starts ~2s in) + high-heel footsteps (0–2s loud, then ducked).
+ * Video has high-heels sound embedded. Dialogue (kinky-lily-map-zh.mp3) starts 2s after video.
+ * Video fades to black early (EARLY_CUT_SEC before end).
  */
 
 import { useRef, useCallback, useEffect, useState } from 'react';
 
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
-const HEELS_SRC = `${BASE_URL}audio/high-heels-walk.mp3`;
+const DIALOGUE_SRC = `${BASE_URL}audio/kinky-lily-map-zh.mp3`;
 
-// Audio volumes
-const HEELS_VOL_LOUD = 0.6;
-const HEELS_VOL_DUCKED = 0.28;
-const HEELS_DUCK_TIME = 2.0; // seconds — dialogue begins here
+// Volumes
 const VIDEO_VOL = 1.0;
+const DIALOGUE_VOL = 1.0;
+const DIALOGUE_DELAY = 2.0; // seconds after video starts
 
 const FREEZE_MS = 300;
 const FADE_MS = 600;
@@ -41,29 +36,26 @@ interface Props {
 export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const [phase, setPhase] = useState<CinematicPhase>('idle');
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const heelsRef = useRef<HTMLAudioElement | null>(null);
+  const dialogueRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
+  const dialogueStarted = useRef(false);
+  const earlyCutTriggered = useRef(false);
 
   // Cleanup
   useEffect(() => {
     return () => {
       cancelAnimationFrame(rafRef.current);
-      heelsRef.current?.pause();
+      dialogueRef.current?.pause();
       videoRef.current?.pause();
     };
   }, []);
 
-  const earlyCutTriggered = useRef(false);
-
-  // Ducking loop — heels loud first 2s, then ducked, fade out last 0.5s
-  // Video audio muted for first 2s, then fades in over 0.3s
-  // Also handles early cut: trigger fade-to-black before video actually ends
-  const startDuckingLoop = useCallback(() => {
+  // RAF loop: start dialogue at 2s, handle early cut
+  const startLoop = useCallback(() => {
     const tick = () => {
       const v = videoRef.current;
-      const h = heelsRef.current;
-      if (!v || !h || v.paused) return;
+      if (!v || v.paused) return;
       const t = v.currentTime;
       const remaining = durationRef.current - t;
 
@@ -71,7 +63,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       if (remaining <= EARLY_CUT_SEC && !earlyCutTriggered.current) {
         earlyCutTriggered.current = true;
         v.pause();
-        h.pause();
+        dialogueRef.current?.pause();
         cancelAnimationFrame(rafRef.current);
         setPhase('freezing');
         setTimeout(() => {
@@ -81,23 +73,22 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         return;
       }
 
-      // Video audio: silent first 2s, fade in over 0.3s
-      if (t < HEELS_DUCK_TIME) {
-        v.volume = 0;
-      } else {
-        const fadeIn = Math.min(1, (t - HEELS_DUCK_TIME) / 0.3);
-        v.volume = VIDEO_VOL * fadeIn;
+      // Start dialogue at DIALOGUE_DELAY seconds
+      if (t >= DIALOGUE_DELAY && !dialogueStarted.current) {
+        dialogueStarted.current = true;
+        const d = dialogueRef.current;
+        if (d) {
+          d.volume = DIALOGUE_VOL;
+          d.play().catch(() => {});
+        }
       }
 
-      // Heels ducking
-      if (remaining <= 0.5 + EARLY_CUT_SEC) {
-        h.volume = Math.max(0, HEELS_VOL_DUCKED * ((remaining - EARLY_CUT_SEC) / 0.5));
-      } else if (t >= HEELS_DUCK_TIME) {
-        const p = Math.min(1, (t - HEELS_DUCK_TIME) / 0.3);
-        h.volume = HEELS_VOL_LOUD - (HEELS_VOL_LOUD - HEELS_VOL_DUCKED) * p;
-      } else {
-        h.volume = HEELS_VOL_LOUD;
+      // Fade dialogue out near end
+      const d = dialogueRef.current;
+      if (d && dialogueStarted.current && remaining <= 1.0 + EARLY_CUT_SEC) {
+        d.volume = Math.max(0, DIALOGUE_VOL * ((remaining - EARLY_CUT_SEC) / 1.0));
       }
+
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -109,26 +100,26 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     const video = videoRef.current;
     if (!video) return;
 
-    video.volume = 0; // starts silent; RAF loop fades in at 2s
+    video.volume = VIDEO_VOL;
     video.muted = false;
 
     const startPlayback = async () => {
-      const heels = new Audio(HEELS_SRC);
-      heels.volume = HEELS_VOL_LOUD;
-      heelsRef.current = heels;
+      // Preload dialogue audio
+      const dialogue = new Audio(DIALOGUE_SRC);
+      dialogue.preload = 'auto';
+      dialogueRef.current = dialogue;
 
       setPhase('playing');
 
       try {
         await video.play();
       } catch {
-        // autoplay blocked — skip gracefully
         setPhase('done');
         onComplete();
         return;
       }
-      heels.play().catch(() => {});
-      startDuckingLoop();
+
+      startLoop();
     };
 
     // If video is already ready, start immediately; otherwise wait for canplay
@@ -155,17 +146,16 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         video.removeEventListener('canplay', onCanPlay);
       };
     }
-  }, [trigger, phase, onComplete, startDuckingLoop]);
+  }, [trigger, phase, onComplete, startLoop]);
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) durationRef.current = videoRef.current.duration;
   }, []);
 
-  // If video fails to load entirely, skip gracefully
   const handleError = useCallback(() => {
     if (phase !== 'done') {
       cancelAnimationFrame(rafRef.current);
-      heelsRef.current?.pause();
+      dialogueRef.current?.pause();
       setPhase('done');
       onComplete();
     }
@@ -173,7 +163,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
   const handleEnded = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
-    heelsRef.current?.pause();
+    dialogueRef.current?.pause();
 
     setPhase('freezing');
     setTimeout(() => {
@@ -197,8 +187,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       className="pointer-events-none"
       style={{
         position: 'absolute',
-        // Match Kinky+Lily area: Kinky left:700, Lily left:1080+width
-        // Center the video across both characters
         left: 680,
         bottom: 300,
         height: 700,
