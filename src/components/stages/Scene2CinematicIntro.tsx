@@ -73,17 +73,28 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     if (!video) return;
 
     video.volume = 1.0;
-    video.muted = false;
 
     const startPlayback = async () => {
       setPhase('playing');
 
+      // Strategy: try unmuted first; if blocked by autoplay policy,
+      // fall back to muted play then unmute (works with prior user gesture).
+      video.muted = false;
       try {
         await video.play();
       } catch {
-        setPhase('done');
-        onComplete();
-        return;
+        // Unmuted play rejected — start muted then unmute
+        video.muted = true;
+        try {
+          await video.play();
+          // Unmute after playback starts (sticky user activation allows this)
+          video.muted = false;
+        } catch {
+          // Complete failure — skip cinematic
+          setPhase('done');
+          onComplete();
+          return;
+        }
       }
       startLoop();
     };
