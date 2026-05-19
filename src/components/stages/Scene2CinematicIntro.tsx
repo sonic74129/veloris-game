@@ -14,7 +14,7 @@ const AUDIO_SRC = `${BASE_URL}audio/scene2-intro-sfx.mp3`;
 
 const FREEZE_MS = 0;
 const FADE_MS = 400;
-const EARLY_CUT_SEC = 0.7;
+const EARLY_CUT_SEC = 1.2;
 
 export type CinematicPhase = 'idle' | 'playing' | 'freezing' | 'done';
 
