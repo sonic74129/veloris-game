@@ -40,15 +40,19 @@ export function LevelMap() {
     setCinematicPhase('done');
   }, []);
 
-  // Delay voiceover by 2s on first visit (wait for video to play a bit first)
+  // Voiceover starts after video finishes (cinematicPhase==='done'), with 1s delay
   const [voiceoverReady, setVoiceoverReady] = useState(!isFirstVisit);
   useEffect(() => {
     if (!isFirstVisit) return;
     // Clear the voiceover played flag so it always autoplays on first visit
     localStorage.removeItem('veloris:vo:map:played');
-    const timer = setTimeout(() => setVoiceoverReady(true), 2000);
-    return () => clearTimeout(timer);
   }, [isFirstVisit]);
+  useEffect(() => {
+    if (!isFirstVisit && voiceoverReady) return;
+    if (cinematicPhase !== 'done') return;
+    const timer = setTimeout(() => setVoiceoverReady(true), 1000);
+    return () => clearTimeout(timer);
+  }, [cinematicPhase, isFirstVisit, voiceoverReady]);
 
   // Characters hidden while video is visible (playing or freezing)
   const showCharacters = cinematicPhase === 'done';
