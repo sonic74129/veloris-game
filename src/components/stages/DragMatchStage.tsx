@@ -161,15 +161,29 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           </div>
         </div>
 
-        <StageRightPanel
-          stage={stage}
-          challengeTitle={ui.panels.challenge}
-          missionTitle={ui.panels.mission}
-          advisor={advisor}
-          hintText={knowledgeHint}
-          onRevealHint={() => setShowOptionDescriptions(true)}
-          onReplayBrief={() => openStoryBriefOverlay(stage.id)}
-        />
+        {/* On mobile, hide the right panel and show a floating button instead */}
+        {isMobile ? (
+          <button
+            onClick={() => openStoryBriefOverlay(stage.id)}
+            className="absolute top-0 right-0 z-20 glass frame-corners px-4 py-2
+                       font-mono text-[11px] tracking-[0.15em] text-gold-4
+                       hover:text-gold-3 border border-gold-1/50 hover:border-gold-3
+                       transition-colors"
+            aria-label="查看背景知识"
+          >
+            📖 背景
+          </button>
+        ) : (
+          <StageRightPanel
+            stage={stage}
+            challengeTitle={ui.panels.challenge}
+            missionTitle={ui.panels.mission}
+            advisor={advisor}
+            hintText={knowledgeHint}
+            onRevealHint={() => setShowOptionDescriptions(true)}
+            onReplayBrief={() => openStoryBriefOverlay(stage.id)}
+          />
+        )}
       </div>
 
       <StoryBriefOverlay
