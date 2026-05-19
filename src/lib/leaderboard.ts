@@ -18,11 +18,11 @@ const API_POST_URL = import.meta.env.VITE_LEADERBOARD_POST as string | undefined
 const STORAGE_KEY = 'frontier:leaderboard';
 
 const SEED_ENTRIES: LeaderboardEntry[] = [
-  { playerName: 'Miranda Priestly', company: 'Runway Group', totalScore: 5200, totalTime: 95, totalWrongAttempts: 1, totalHintsUsed: 0, timestamp: 1716000000000 },
-  { playerName: 'Lily Chen', company: 'Contoso Maison', totalScore: 4800, totalTime: 110, totalWrongAttempts: 2, totalHintsUsed: 0, timestamp: 1716100000000 },
-  { playerName: 'Kinky Wang', company: 'Fabrikam', totalScore: 4500, totalTime: 120, totalWrongAttempts: 3, totalHintsUsed: 1, timestamp: 1716200000000 },
-  { playerName: 'Nigel', company: 'Atelier AI', totalScore: 3900, totalTime: 140, totalWrongAttempts: 4, totalHintsUsed: 2, timestamp: 1716300000000 },
-  { playerName: 'Emily Charlton', company: 'Cerulean', totalScore: 3200, totalTime: 160, totalWrongAttempts: 5, totalHintsUsed: 3, timestamp: 1716400000000 },
+  { playerName: 'Miranda Priestly', company: 'Runway Group', totalScore: 1800, totalTime: 360, totalWrongAttempts: 8, totalHintsUsed: 2, timestamp: 1716000000000 },
+  { playerName: 'Lily Chen', company: 'Contoso Maison', totalScore: 1400, totalTime: 400, totalWrongAttempts: 10, totalHintsUsed: 3, timestamp: 1716100000000 },
+  { playerName: 'Kinky Wang', company: 'Fabrikam', totalScore: 1100, totalTime: 430, totalWrongAttempts: 12, totalHintsUsed: 3, timestamp: 1716200000000 },
+  { playerName: 'Nigel', company: 'Atelier AI', totalScore: 800, totalTime: 470, totalWrongAttempts: 14, totalHintsUsed: 4, timestamp: 1716300000000 },
+  { playerName: 'Emily Charlton', company: 'Cerulean', totalScore: 500, totalTime: 520, totalWrongAttempts: 16, totalHintsUsed: 5, timestamp: 1716400000000 },
 ];
 
 function sortEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {

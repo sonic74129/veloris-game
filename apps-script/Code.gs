@@ -17,11 +17,11 @@ const SHEET_NAME = 'Leaderboard';
 
 // Seed data — first time only
 const SEED_DATA = [
-  ['Miranda Priestly', 'Runway Group', 5200, 95, 1, 0, 1716000000000],
-  ['Lily Chen', 'Contoso Maison', 4800, 110, 2, 0, 1716100000000],
-  ['Kinky Wang', 'Fabrikam', 4500, 120, 3, 1, 1716200000000],
-  ['Nigel', 'Atelier AI', 3900, 140, 4, 2, 1716300000000],
-  ['Emily Charlton', 'Cerulean', 3200, 160, 5, 3, 1716400000000],
+  ['Miranda Priestly', 'Runway Group', 1800, 360, 8, 2, 1716000000000],
+  ['Lily Chen', 'Contoso Maison', 1400, 400, 10, 3, 1716100000000],
+  ['Kinky Wang', 'Fabrikam', 1100, 430, 12, 3, 1716200000000],
+  ['Nigel', 'Atelier AI', 800, 470, 14, 4, 1716300000000],
+  ['Emily Charlton', 'Cerulean', 500, 520, 16, 5, 1716400000000],
 ];
 
 function getSheet() {
@@ -37,8 +37,20 @@ function getSheet() {
   return sheet;
 }
 
-// GET request → return sorted leaderboard JSON
+// GET ?action=reset → clear and re-seed the sheet
 function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'reset') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (sheet) ss.deleteSheet(sheet);
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.getRange(1, 1, 1, 7).setValues([['playerName', 'company', 'totalScore', 'totalTime', 'totalWrongAttempts', 'totalHintsUsed', 'timestamp']]);
+    sheet.getRange(2, 1, SEED_DATA.length, 7).setValues(SEED_DATA);
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true, message: 'Sheet reset with new seed data' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   const sheet = getSheet();
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
