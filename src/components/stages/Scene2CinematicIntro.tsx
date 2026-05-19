@@ -10,9 +10,9 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
 
-const FREEZE_MS = 300;
-const FADE_MS = 600;
-const EARLY_CUT_SEC = 0.5;
+const FREEZE_MS = 150;
+const FADE_MS = 400;
+const EARLY_CUT_SEC = 0.1;
 
 export type CinematicPhase = 'idle' | 'playing' | 'freezing' | 'done';
 
@@ -159,9 +159,9 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       className="pointer-events-none"
       style={{
         position: 'absolute',
-        left: 680,
-        bottom: 300,
-        height: 700,
+        left: 530,
+        bottom: 340,
+        height: 640,
         width: 'auto',
         zIndex: 1,
         objectFit: 'contain',
