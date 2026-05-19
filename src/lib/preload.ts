@@ -37,6 +37,10 @@ const IMAGE_FILES = [
   'assets/characters/lily.png',
 ];
 
+const VIDEO_FILES = [
+  'video/scene2-intro.mp4',
+];
+
 let _started = false;
 
 export function preloadAssets() {
@@ -51,6 +55,16 @@ export function preloadAssets() {
 
   // Preload audio via <link rel="prefetch"> to avoid blocking
   for (const path of AUDIO_FILES) {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'fetch';
+    link.href = BASE + path;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  }
+
+  // Preload video via <link rel="prefetch">
+  for (const path of VIDEO_FILES) {
     const link = document.createElement('link');
     link.rel = 'prefetch';
     link.as = 'fetch';
