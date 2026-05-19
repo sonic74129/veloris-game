@@ -47,9 +47,9 @@ export function CharacterLayer({
   // For non-Miranda leads, use height + auto width so aspect ratio stays correct
   // and Kinky/Lily render at a consistent visual size regardless of source.
   const leadSrc =
-    lead === 'kinky' ? `${BASE}assets/characters/kinky2.png`
-    : lead === 'lily'  ? `${BASE}assets/characters/lily.png`
-    : `${BASE}assets/characters/Miranda.png`;
+    lead === 'kinky' ? `${BASE}assets/characters/kinky2.webp`
+    : lead === 'lily'  ? `${BASE}assets/characters/lily.webp`
+    : `${BASE}assets/characters/Miranda.webp`;
   const leadAlt = lead === 'kinky' ? 'Kinky' : lead === 'lily' ? 'Lily' : 'Miranda';
   const leadStyle: React.CSSProperties = lead === 'miranda'
     ? mirandaStyle
@@ -79,7 +79,7 @@ export function CharacterLayer({
           {/* Kinky & Lily — fixed height + auto width so both render visually
               the same size regardless of source aspect ratio. */}
           <img
-            src={`${BASE}assets/characters/kinky2.png`}
+            src={`${BASE}assets/characters/kinky2.webp`}
             alt="Kinky"
             style={{
               position: 'absolute',
@@ -95,7 +95,7 @@ export function CharacterLayer({
             }}
           />
           <img
-            src={`${BASE}assets/characters/lily.png`}
+            src={`${BASE}assets/characters/lily.webp`}
             alt="Lily"
             style={{
               position: 'absolute',
@@ -116,11 +116,11 @@ export function CharacterLayer({
       {advisorMode === 'small' && (
         <>
           <AdvisorChip
-            src={`${BASE}assets/characters/kinky2.png`} name="KINKY"
+            src={`${BASE}assets/characters/kinky2.webp`} name="KINKY"
             role="Strategy"  left={60} bottom={110}
           />
           <AdvisorChip
-            src={`${BASE}assets/characters/lily.png`} name="LILY"
+            src={`${BASE}assets/characters/lily.webp`} name="LILY"
             role="Ops"       left={210} bottom={110}
           />
         </>

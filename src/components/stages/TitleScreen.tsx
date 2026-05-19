@@ -34,7 +34,7 @@ export function TitleScreen() {
         >
           {/* Full poster, contained (no cropping) */}
           <img
-            src={`${BASE_URL}assets/frontpage.png`}
+            src={`${BASE_URL}assets/frontpage.webp`}
             alt=""
             className="absolute inset-0 w-full h-full object-contain"
             draggable={false}

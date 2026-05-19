@@ -31,10 +31,10 @@ const AUDIO_FILES = [
 ];
 
 const IMAGE_FILES = [
-  'assets/characters/Miranda.png',
-  'assets/characters/kinky.png',
-  'assets/characters/kinky2.png',
-  'assets/characters/lily.png',
+  'assets/characters/Miranda.webp',
+  'assets/characters/kinky.webp',
+  'assets/characters/kinky2.webp',
+  'assets/characters/lily.webp',
 ];
 
 const VIDEO_FILES = [
