@@ -100,8 +100,8 @@ export function LevelMap() {
         </div>
       </div>
 
-      {/* Speech bubble — voiceover overlay, left column below header */}
-      {language === 'zh' && (
+      {/* Speech bubble — voiceover overlay, only after cinematic is done */}
+      {language === 'zh' && cinematicPhase === 'done' && !isFirstVisit && (
         <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble />
         </div>
