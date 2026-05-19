@@ -20,6 +20,8 @@ export interface SingleFileVoiceover {
 interface Props {
   voiceover: SingleFileVoiceover;
   autoPlay?: boolean;
+  /** Force play regardless of localStorage (skip "already played" check) */
+  forcePlay?: boolean;
   onEnded?: () => void;
   className?: string;
   /** Render as a visual-novel speech bubble panel (always visible from mount) */
@@ -33,6 +35,7 @@ type Status = 'idle' | 'playing' | 'ended' | 'blocked' | 'fallback';
 export function SingleFileVoiceoverPlayer({
   voiceover,
   autoPlay = true,
+  forcePlay = false,
   onEnded,
   className = '',
   speechBubble = false,
@@ -94,7 +97,7 @@ export function SingleFileVoiceoverPlayer({
     const handleCanPlay = () => {
       if (didInit.current || !autoPlay) return;
       didInit.current = true;
-      if (localStorage.getItem(storageKey) !== '1') startPlay();
+      if (forcePlay || localStorage.getItem(storageKey) !== '1') startPlay();
     };
 
     const handleTimeUpdate = () => {
