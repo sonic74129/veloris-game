@@ -5,9 +5,9 @@
 
 const BGM_MUTED_KEY = 'veloris:bgm:muted';
 export const BGM_FULL   = 0.35;
-export const BGM_DUCKED = 0.07;
+export const BGM_DUCKED = 0.02;
 
-const FADE_MS = 700;
+const FADE_MS = 400;
 
 let _audio: HTMLAudioElement | null = null;
 let _started = false;

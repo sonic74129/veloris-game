@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChallengeCard } from '../panels/ChallengeCard';
 import { MissionPanel } from '../panels/MissionPanel';
@@ -22,6 +23,12 @@ export function MissionBriefing({ stage }: Props) {
   const goToStage = useGameState((s) => s.goToStage);
   const ui = packs[language].ui;
   const isMobile = useMobile();
+
+  // Pre-duck BGM as soon as this stage mounts (before VO loads)
+  useEffect(() => {
+    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+    return () => { document.dispatchEvent(new CustomEvent('veloris:vo:end')); };
+  }, []);
 
   return (
     <>

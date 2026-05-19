@@ -107,7 +107,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
 
       <div className={`absolute flex gap-6 ${
         isMobile
-          ? 'top-[55px] left-[280px] right-[30px] bottom-[52px]'
+          ? 'top-[55px] left-[280px] right-[30px] bottom-[75px]'
           : 'top-[100px] left-[370px] right-[60px] bottom-[90px]'
       }`}>
         {/* Center column: header + slots + options */}

@@ -124,7 +124,7 @@ export function LevelMap() {
       {/* Stage nodes */}
       <div className={`absolute z-[6] ${
         isMobile
-          ? 'left-[30px] right-[30px] bottom-[55px]'
+          ? 'left-[30px] right-[30px] bottom-[75px]'
           : 'left-[60px] right-[60px] bottom-[110px]'
       }`}>
         <div className={`grid gap-4 relative ${isMobile ? 'grid-cols-5' : 'grid-cols-5'}`}>
