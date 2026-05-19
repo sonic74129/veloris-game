@@ -165,7 +165,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         className="pointer-events-none"
         style={{
           position: 'absolute',
-          left: 300,
+          left: 200,
           bottom: 340,
           height: 640,
           width: 'auto',
