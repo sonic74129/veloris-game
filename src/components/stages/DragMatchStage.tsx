@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { StageHeader } from '../layout/StageHeader';
 import { ChallengeCard } from '../panels/ChallengeCard';
 import { MissionPanel } from '../panels/MissionPanel';
 import { KnowledgePanel } from '../panels/KnowledgePanel';
-import { HintPanel } from '../panels/HintPanel';
+import { InteractiveHintPanel } from '../gameplay/InteractiveHintPanel';
 import { PuzzleBoard } from '../gameplay/PuzzleBoard';
-import { StageCompleteModal } from '../gameplay/StageCompleteModal';
+import { StageCompleteOverlay } from '../gameplay/StageCompleteOverlay';
 import type { StageConfig, StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
 import { useMobile } from '../../lib/mobile';
+import type { StageScore } from '../../lib/scoring';
 
 interface Props { stage: StageConfig; slotsLayout?: 'horizontal' | 'vertical' }
 
@@ -20,28 +21,47 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
   const resetStage = useGameState((s) => s.resetStage);
   const goToStage = useGameState((s) => s.goToStage);
   const completed = useGameState((s) => s.completedStages);
+  const startStageRun = useGameState((s) => s.startStageRun);
+  const recordWrongAttempt = useGameState((s) => s.recordWrongAttempt);
+  const finishStageRun = useGameState((s) => s.finishStageRun);
   const ui = packs[language].ui;
 
   const isMobile = useMobile();
-  const [showModal, setShowModal] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [lastScore, setLastScore] = useState<StageScore | null>(null);
   const wasCompleted = completed.includes(stage.id);
+
+  // Start timer when stage mounts
+  useEffect(() => {
+    if (!wasCompleted) {
+      startStageRun(stage.id);
+    }
+  }, [stage.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = () => {
     if (!wasCompleted) {
+      const score = finishStageRun();
+      setLastScore(score);
       completeStage(stage.id);
-      setShowModal(true);
-    } else if (!showModal) {
-      // re-completion after reset
-      setShowModal(true);
+      setShowOverlay(true);
     }
   };
 
-  const handleNext = () => {
-    setShowModal(false);
+  const handleWrong = () => {
+    recordWrongAttempt();
+  };
+
+  const handleNext = useCallback(() => {
+    setShowOverlay(false);
     const idx = STAGE_ORDER.indexOf(stage.id);
     const nextId = STAGE_ORDER[idx + 1] as StageId | undefined;
     if (nextId) goToStage(nextId);
-  };
+  }, [stage.id, goToStage]);
+
+  // Generate hint text for Kinky and Lily based on stage hint
+  const hintText = stage.hint ?? '仔细观察每个选项的描述，找出与问题的对应关系。';
+  const kinkyHint = `好啦 CTO，放轻松一点。${hintText}`;
+  const lilyHint = `从架构角度想 — ${hintText}`;
 
   return (
     <>
@@ -74,7 +94,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           </div>
 
           <div className="flex-1 overflow-y-auto pr-1">
-            <PuzzleBoard stage={stage} slotsLayout={slotsLayout} onComplete={handleComplete} />
+            <PuzzleBoard stage={stage} slotsLayout={slotsLayout} onComplete={handleComplete} onWrong={handleWrong} />
           </div>
         </div>
 
@@ -93,15 +113,19 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           {stage.knowledgePoints && stage.knowledgePoints.length > 0 && (
             <KnowledgePanel title={ui.panels.knowledge} points={stage.knowledgePoints} />
           )}
-          {stage.hint && <HintPanel title={ui.panels.hint} body={stage.hint} />}
+          {/* Interactive hint panel with Kinky + Lily buttons */}
+          <InteractiveHintPanel
+            stageId={stage.id}
+            kinkyHint={kinkyHint}
+            lilyHint={lilyHint}
+          />
         </div>
       </div>
 
-      <StageCompleteModal
-        show={showModal}
-        title={ui.modal.title}
-        body={ui.modal.body}
-        nextLabel={ui.modal.nextStage}
+      <StageCompleteOverlay
+        show={showOverlay}
+        stageScore={lastScore}
+        stageNumber={stage.stageNumber ?? 1}
         onNext={handleNext}
       />
     </>

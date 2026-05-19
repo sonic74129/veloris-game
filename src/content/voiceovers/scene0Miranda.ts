@@ -21,7 +21,7 @@ export const SCENE0_SCRIPT: VoiceoverScript = {
   lines: [
     {
       id:           'welcome',
-      text:         '[calm] Welcome to Veloris Maison.',
+      text:         '[calm] Welcome to Contoso Maison.',
       style:        'calm',
       styleDegree:  1.15,
       pauseAfterMs: 900,

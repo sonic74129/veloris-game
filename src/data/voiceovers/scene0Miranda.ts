@@ -65,7 +65,7 @@ export const STYLE_FALLBACK: Record<string, string> = {
 export const SCENE0_LINES: VoiceoverLine[] = [
   {
     id: 'welcome',
-    text: 'Welcome to Veloris Maison.',
+    text: 'Welcome to Contoso Maison.',
     style: 'confident',
     styleDegree: 1.25,
     pauseAfterMs: 350,

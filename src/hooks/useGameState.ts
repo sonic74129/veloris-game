@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Language, StageId } from '../data/types';
 import { packs } from '../data';
+import { computeStageScore, computeRunResult, type StageScore, type RunResult } from '../lib/scoring';
+
+export interface PlayerInfo {
+  name: string;
+  company: string;
+}
+
+export interface StageRunState {
+  stageId: string;
+  startTime: number;    // Date.now() when stage started
+  wrongAttempts: number;
+  hintsUsed: number;
+}
 
 interface GameState {
   currentStageId: StageId;
@@ -13,6 +26,18 @@ interface GameState {
   energy: number;
   language: Language;
 
+  // --- Player & Run state ---
+  player: PlayerInfo | null;
+  currentRun: StageRunState | null;
+  stageScores: StageScore[];
+  runResult: RunResult | null;
+
+  setPlayer: (info: PlayerInfo) => void;
+  startStageRun: (stageId: string) => void;
+  recordWrongAttempt: () => void;
+  recordHintUsed: () => void;
+  finishStageRun: () => StageScore | null;
+
   goToStage: (id: StageId) => void;
   goBack: () => void;
   completeStage: (id: StageId) => void;
@@ -22,12 +47,14 @@ interface GameState {
   validatePlacement: (slotId: string, optionId: string) => 'correct' | 'wrong';
   /** Reset everything to initial */
   hardReset: () => void;
+  /** Restart a new game run (keep player, clear scores) */
+  restartRun: () => void;
 }
 
 const INITIAL_UNLOCKED: StageId[] = ['title', 'mission', 'map', 'stage1'];
 
 const STAGE_ORDER: StageId[] = [
-  'title', 'mission', 'map', 'stage1', 'stage2', 'stage3', 'stage4', 'stage5',
+  'title', 'mission', 'map', 'stage1', 'stage2', 'stage3', 'stage4', 'stage5', 'results', 'leaderboard',
 ];
 
 export const useGameState = create<GameState>()(
@@ -40,6 +67,49 @@ export const useGameState = create<GameState>()(
       score: 0,
       energy: 100,
       language: 'zh',
+
+      // --- Player & Run ---
+      player: null,
+      currentRun: null,
+      stageScores: [],
+      runResult: null,
+
+      setPlayer: (info) => set({ player: info }),
+
+      startStageRun: (stageId) =>
+        set({ currentRun: { stageId, startTime: Date.now(), wrongAttempts: 0, hintsUsed: 0 } }),
+
+      recordWrongAttempt: () => {
+        const run = get().currentRun;
+        if (!run) return;
+        set({ currentRun: { ...run, wrongAttempts: run.wrongAttempts + 1 } });
+      },
+
+      recordHintUsed: () => {
+        const run = get().currentRun;
+        if (!run) return;
+        set({ currentRun: { ...run, hintsUsed: run.hintsUsed + 1 } });
+      },
+
+      finishStageRun: () => {
+        const run = get().currentRun;
+        if (!run) return null;
+        const elapsed = Math.round((Date.now() - run.startTime) / 1000);
+        const stageScore = computeStageScore({
+          stageId: run.stageId,
+          timeSeconds: elapsed,
+          wrongAttempts: run.wrongAttempts,
+          hintsUsed: run.hintsUsed,
+        });
+        const scores = [...get().stageScores, stageScore];
+        const isLastStage = run.stageId === 'stage5';
+        set({
+          currentRun: null,
+          stageScores: scores,
+          runResult: isLastStage ? computeRunResult(scores) : null,
+        });
+        return stageScore;
+      },
 
       goToStage: (id) => {
         if (!get().unlockedStages.includes(id)) return;
@@ -56,9 +126,14 @@ export const useGameState = create<GameState>()(
         const { completedStages, unlockedStages, score } = get();
         const idx = STAGE_ORDER.indexOf(id);
         const nextId = STAGE_ORDER[idx + 1];
-        const newUnlocked = nextId && !unlockedStages.includes(nextId)
+        let newUnlocked = nextId && !unlockedStages.includes(nextId)
           ? [...unlockedStages, nextId]
-          : unlockedStages;
+          : [...unlockedStages];
+        // Completing final stage unlocks both results + leaderboard
+        if (id === 'stage5') {
+          if (!newUnlocked.includes('results')) newUnlocked.push('results');
+          if (!newUnlocked.includes('leaderboard')) newUnlocked.push('leaderboard');
+        }
         set({
           completedStages: completedStages.includes(id)
             ? completedStages
@@ -110,6 +185,22 @@ export const useGameState = create<GameState>()(
         slotAssignments: {},
         score: 0,
         energy: 100,
+        player: null,
+        currentRun: null,
+        stageScores: [],
+        runResult: null,
+      }),
+
+      restartRun: () => set({
+        currentStageId: 'title',
+        unlockedStages: INITIAL_UNLOCKED,
+        completedStages: [],
+        slotAssignments: {},
+        score: 0,
+        energy: 100,
+        currentRun: null,
+        stageScores: [],
+        runResult: null,
       }),
     }),
     {

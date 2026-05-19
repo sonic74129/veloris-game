@@ -2,7 +2,7 @@ export function RotatePrompt() {
   return (
     <div className="w-screen h-screen bg-ink-0 text-warm-1 flex flex-col items-center justify-center p-8 text-center">
       <div className="font-brand text-[11px] tracking-[0.42em] text-gold-3 mb-6">
-        VELORIS MAISON
+        CONTOSO MAISON
       </div>
       <RotateIcon />
       <div className="font-cn text-[24px] tracking-[0.12em] text-warm-1 mt-6">

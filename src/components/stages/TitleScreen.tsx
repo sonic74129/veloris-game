@@ -1,14 +1,21 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameState } from '../../hooks/useGameState';
+import { PlayerEntryModal } from '../gameplay/PlayerEntryModal';
 
 const BASE_URL = import.meta.env.BASE_URL;
 
 export function TitleScreen() {
   const goToStage = useGameState((s) => s.goToStage);
+  const player = useGameState((s) => s.player);
+  const [showModal, setShowModal] = useState(true);
   const [exiting, setExiting] = useState(false);
 
   const handleStart = () => {
+    if (!player) {
+      setShowModal(true);
+      return;
+    }
     setExiting(true);
     setTimeout(() => goToStage('mission'), 900);
   };
@@ -62,6 +69,9 @@ export function TitleScreen() {
               </div>
             </motion.button>
           </div>
+
+          {/* Player entry modal — shows on top of title */}
+          {showModal && !player && <PlayerEntryModal />}
         </motion.div>
       )}
     </AnimatePresence>

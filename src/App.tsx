@@ -5,6 +5,8 @@ import { MissionBriefing } from './components/stages/MissionBriefing';
 import { LevelMap } from './components/stages/LevelMap';
 import { DragMatchStage } from './components/stages/DragMatchStage';
 import { ComingSoonStage } from './components/stages/ComingSoonStage';
+import { RunResultScreen } from './components/stages/RunResultScreen';
+import { LeaderboardScreen } from './components/stages/LeaderboardScreen';
 import { useGameState } from './hooks/useGameState';
 import { packs } from './data';
 import { initBgm } from './lib/bgm';
@@ -48,6 +50,12 @@ export default function App() {
       case 'drag-match':         return <DragMatchStage stage={stage} />;
       case 'architecture-fill':  return <DragMatchStage stage={stage} slotsLayout="vertical" />;
       case 'safety-boundary':    return <DragMatchStage stage={stage} slotsLayout="vertical" />;
+      default:                   break;
+    }
+    // Stage ID-based routing (no type in data)
+    switch (currentStageId) {
+      case 'results':            return <RunResultScreen />;
+      case 'leaderboard':        return <LeaderboardScreen />;
       default:                   return null;
     }
   };

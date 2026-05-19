@@ -1,10 +1,9 @@
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
+import { RunStatusBarHUD } from './RunStatusBarHUD';
 
 export function TopStatusBar() {
   const language = useGameState((s) => s.language);
-  const score = useGameState((s) => s.score);
-  const energy = useGameState((s) => s.energy);
   const completed = useGameState((s) => s.completedStages.length);
   const ui = packs[language].ui;
 
@@ -39,40 +38,10 @@ export function TopStatusBar() {
         </div>
       </div>
 
-      {/* HUD */}
-      <div className="w-[300px] flex items-center justify-end gap-5 text-warm-2">
-        <Stat label={ui.hud.level} value={String(Math.floor(score / 100)).padStart(2, '0')} icon={<CrownIcon />} />
-        <Stat label="" value={String(score).padStart(3, '0')} icon={<DiamondIcon />} />
-        <Stat label="" value={`${energy}/100`} icon={<BoltIcon />} />
-        <div className="w-9 h-9 rounded-full border border-gold-3 bg-ink-2 flex items-center justify-center
-                        font-brand text-[10px] text-gold-4">M·V</div>
+      {/* HUD — Run status bar replaces old stat display when player exists */}
+      <div className="w-[360px] flex items-center justify-end pointer-events-auto">
+        <RunStatusBarHUD />
       </div>
     </header>
   );
 }
-
-function Stat({ label, value, icon }: { label?: string; value: string; icon: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-1.5 font-mono text-[11px] text-warm-2">
-      <span className="text-gold-3">{icon}</span>
-      {label && <span className="text-warm-3">{label}</span>}
-      <span className="text-warm-1">{value}</span>
-    </div>
-  );
-}
-
-const CrownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-    <path d="M3 9l4 3 5-6 5 6 4-3v9H3z" />
-  </svg>
-);
-const DiamondIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-    <path d="M6 9l6-5 6 5-6 11z" />
-  </svg>
-);
-const BoltIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-    <path d="M13 3L5 14h6l-1 7 8-11h-6z" />
-  </svg>
-);

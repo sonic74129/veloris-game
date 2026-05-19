@@ -8,7 +8,9 @@ export type StageId =
   | 'stage2'
   | 'stage3'
   | 'stage4'
-  | 'stage5';
+  | 'stage5'
+  | 'results'
+  | 'leaderboard';
 
 export type AccentColor =
   | 'gold' | 'cyan' | 'purple' | 'green' | 'blue' | 'pink' | 'red';

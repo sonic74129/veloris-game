@@ -82,7 +82,7 @@ export function MissionBriefing({ stage }: Props) {
                 "{stage.challenge.quote}"
               </div>
               <div className="mt-3 font-mono text-[9px] tracking-[0.28em] text-warm-3">
-                — Miranda Veloris, Maison Queen
+                — Miranda Contoso, Maison Queen
               </div>
             </div>
           )}

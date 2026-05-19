@@ -16,9 +16,10 @@ interface PuzzleBoardProps {
   /** layout direction for slots */
   slotsLayout?: 'horizontal' | 'vertical';
   onComplete: () => void;
+  onWrong?: () => void;
 }
 
-export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete }: PuzzleBoardProps) {
+export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete, onWrong }: PuzzleBoardProps) {
   const slots = stage.slots ?? [];
   const options = stage.options ?? [];
   const correctMap = stage.correctMapping ?? {};
@@ -81,6 +82,7 @@ export function PuzzleBoard({ stage, slotsLayout = 'horizontal', onComplete }: P
     if (result === 'wrong') {
       setWrongSlotId(slotId);
       setTimeout(() => setWrongSlotId(null), 600);
+      onWrong?.();
     }
   };
 

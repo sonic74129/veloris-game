@@ -60,7 +60,7 @@ export const SCENE0_VOICEOVER: StageVoiceover = {
   src: 'audio/miranda-scene0.mp3',
   storageKey: 'veloris:vo:mission:played',
   cues: [
-    { start: 0.0,  end: 5.5,  text: 'Welcome to Veloris Maison.' },
+    { start: 0.0,  end: 5.5,  text: 'Welcome to Contoso Maison.' },
     { start: 8.0,  end: 10.0, text: 'Hmm.' },
     { start: 10.5, end: 17.5, text: 'I brought you here because this house is running out of time.' },
     { start: 18.3, end: 22.5, text: 'Our systems are fragmented.' },
