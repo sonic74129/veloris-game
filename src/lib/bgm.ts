@@ -12,6 +12,7 @@ const FADE_MS = 700;
 let _audio: HTMLAudioElement | null = null;
 let _started = false;
 let _onStateChange: ((playing: boolean) => void) | null = null;
+let _fadeId: ReturnType<typeof setInterval> | null = null;
 
 function audio(): HTMLAudioElement {
   if (!_audio) {
@@ -24,15 +25,17 @@ function audio(): HTMLAudioElement {
 }
 
 export function fade(target: number, ms = FADE_MS) {
+  // Cancel any in-progress fade to prevent competing intervals
+  if (_fadeId !== null) { clearInterval(_fadeId); _fadeId = null; }
   const a = audio();
   const start = a.volume;
   const steps = 30;
   const delta = (target - start) / steps;
   let i = 0;
-  const id = setInterval(() => {
+  _fadeId = setInterval(() => {
     i++;
     a.volume = Math.min(1, Math.max(0, start + delta * i));
-    if (i >= steps) clearInterval(id);
+    if (i >= steps) { clearInterval(_fadeId!); _fadeId = null; }
   }, ms / steps);
 }
 

@@ -51,11 +51,12 @@ export function SingleFileVoiceoverPlayer({
     const el = audioRef.current;
     if (!el) return;
     setStatus('playing');
-    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
-    el.play().catch(() => {
+    el.play().then(() => {
+      // Only duck BGM after play actually succeeds
+      document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+    }).catch(() => {
       setStatus('blocked');
-      // Restore BGM — play was blocked so vo:end will never fire naturally
-      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+      // Play was blocked — BGM was never ducked, nothing to restore
     });
   }, []);
 
@@ -66,10 +67,10 @@ export function SingleFileVoiceoverPlayer({
     el.currentTime = 0;
     setStatus('playing');
     setActiveCue(null);
-    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
-    el.play().catch(() => {
+    el.play().then(() => {
+      document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+    }).catch(() => {
       setStatus('blocked');
-      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
     });
   }, [status, storageKey]);
 
