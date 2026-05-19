@@ -57,6 +57,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const earlyCutTriggered = useRef(false);
 
   // Ducking loop — heels loud first 2s, then ducked, fade out last 0.5s
+  // Video audio muted for first 2s, then fades in over 0.3s
   // Also handles early cut: trigger fade-to-black before video actually ends
   const startDuckingLoop = useCallback(() => {
     const tick = () => {
@@ -80,6 +81,15 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         return;
       }
 
+      // Video audio: silent first 2s, fade in over 0.3s
+      if (t < HEELS_DUCK_TIME) {
+        v.volume = 0;
+      } else {
+        const fadeIn = Math.min(1, (t - HEELS_DUCK_TIME) / 0.3);
+        v.volume = VIDEO_VOL * fadeIn;
+      }
+
+      // Heels ducking
       if (remaining <= 0.5 + EARLY_CUT_SEC) {
         h.volume = Math.max(0, HEELS_VOL_DUCKED * ((remaining - EARLY_CUT_SEC) / 0.5));
       } else if (t >= HEELS_DUCK_TIME) {
@@ -99,7 +109,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     const video = videoRef.current;
     if (!video) return;
 
-    video.volume = VIDEO_VOL;
+    video.volume = 0; // starts silent; RAF loop fades in at 2s
     video.muted = false;
 
     const startPlayback = async () => {
