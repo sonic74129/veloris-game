@@ -42,6 +42,12 @@ export default function App() {
   useEffect(() => initBgm(import.meta.env.BASE_URL, () => {}), []);
 
   const render = () => {
+    // Stage ID-based routing (no type in data)
+    switch (currentStageId) {
+      case 'results':            return <RunResultScreen />;
+      case 'leaderboard':        return <LeaderboardScreen />;
+      default:                   break;
+    }
     if (stage.comingSoon) return <ComingSoonStage stage={stage} />;
     switch (stage.type) {
       case 'title':              return <TitleScreen />;
@@ -50,12 +56,6 @@ export default function App() {
       case 'drag-match':         return <DragMatchStage stage={stage} />;
       case 'architecture-fill':  return <DragMatchStage stage={stage} slotsLayout="vertical" />;
       case 'safety-boundary':    return <DragMatchStage stage={stage} slotsLayout="vertical" />;
-      default:                   break;
-    }
-    // Stage ID-based routing (no type in data)
-    switch (currentStageId) {
-      case 'results':            return <RunResultScreen />;
-      case 'leaderboard':        return <LeaderboardScreen />;
       default:                   return null;
     }
   };

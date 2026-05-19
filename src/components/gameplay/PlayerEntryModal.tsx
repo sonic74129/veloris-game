@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameState } from '../../hooks/useGameState';
+import { preloadAssets } from '../../lib/preload';
 
 export function PlayerEntryModal() {
   const player = useGameState((s) => s.player);
@@ -10,6 +11,9 @@ export function PlayerEntryModal() {
   const [name, setName] = useState(player?.name ?? '');
   const [company, setCompany] = useState(player?.company ?? '');
   const [exiting, setExiting] = useState(false);
+
+  // Preload BGM, voiceover audio, and character images while user fills form
+  useEffect(() => { preloadAssets(); }, []);
 
   const canSubmit = name.trim().length > 0 && company.trim().length > 0;
 
