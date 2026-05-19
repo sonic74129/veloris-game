@@ -12,9 +12,9 @@ const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
 const AUDIO_SRC = `${BASE_URL}audio/scene2-intro-sfx.mp3`;
 
-const FREEZE_MS = 150;
+const FREEZE_MS = 0;
 const FADE_MS = 400;
-const EARLY_CUT_SEC = 0.1;
+const EARLY_CUT_SEC = 0.35;
 
 export type CinematicPhase = 'idle' | 'playing' | 'freezing' | 'done';
 
