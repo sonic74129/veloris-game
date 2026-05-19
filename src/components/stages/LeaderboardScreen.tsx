@@ -14,7 +14,7 @@ export function LeaderboardScreen() {
   const allRows = board;
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-10">
+    <div className="absolute inset-0 overflow-y-auto px-10 pt-16 pb-10">
       {/* Header */}
       <div className="flex justify-between items-end mb-6 max-w-[1400px] mx-auto">
         <div>
