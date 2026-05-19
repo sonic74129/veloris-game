@@ -1,14 +1,16 @@
 /**
  * Scene2CinematicIntro — In-place video at the Kinky/Lily character position.
  *
- * Video has high-heels sound embedded. Fades to black early (EARLY_CUT_SEC before end).
- * Dialogue is handled separately by SingleFileVoiceoverPlayer in LevelMap (delayed 2s).
+ * Video is always muted (avoids autoplay policy issues).
+ * Audio is played via a separate <audio> element (reliable across browsers).
+ * Dialogue is handled separately by SingleFileVoiceoverPlayer in LevelMap (after video ends).
  */
 
 import { useRef, useCallback, useEffect, useState } from 'react';
 
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
+const AUDIO_SRC = `${BASE_URL}audio/scene2-intro-sfx.mp3`;
 
 const FREEZE_MS = 150;
 const FADE_MS = 400;
@@ -30,6 +32,7 @@ interface Props {
 export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const [phase, setPhase] = useState<CinematicPhase>('idle');
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
   const earlyCutTriggered = useRef(false);
@@ -39,6 +42,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     return () => {
       cancelAnimationFrame(rafRef.current);
       videoRef.current?.pause();
+      audioRef.current?.pause();
     };
   }, []);
 
@@ -52,6 +56,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       if (remaining <= EARLY_CUT_SEC && !earlyCutTriggered.current) {
         earlyCutTriggered.current = true;
         v.pause();
+        if (audioRef.current) audioRef.current.pause();
         cancelAnimationFrame(rafRef.current);
         setPhase('freezing');
         setTimeout(() => {
@@ -72,30 +77,26 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     const video = videoRef.current;
     if (!video) return;
 
-    video.volume = 1.0;
-
     const startPlayback = async () => {
       setPhase('playing');
 
-      // Strategy: try unmuted first; if blocked by autoplay policy,
-      // fall back to muted play then unmute (works with prior user gesture).
-      video.muted = false;
+      // Video always muted — audio via separate <audio> element
+      video.muted = true;
       try {
         await video.play();
       } catch {
-        // Unmuted play rejected — start muted then unmute
-        video.muted = true;
-        try {
-          await video.play();
-          // Unmute after playback starts (sticky user activation allows this)
-          video.muted = false;
-        } catch {
-          // Complete failure — skip cinematic
-          setPhase('done');
-          onComplete();
-          return;
-        }
+        // Video can't play at all — skip cinematic
+        setPhase('done');
+        onComplete();
+        return;
       }
+
+      // Play audio SFX (separate element, reliable autoplay)
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+
       startLoop();
     };
 
@@ -130,6 +131,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const handleError = useCallback(() => {
     if (phase !== 'done') {
       cancelAnimationFrame(rafRef.current);
+      audioRef.current?.pause();
       setPhase('done');
       onComplete();
     }
@@ -137,6 +139,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
   const handleEnded = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
+    audioRef.current?.pause();
     setPhase('freezing');
     setTimeout(() => {
       setPhase('done');
@@ -148,28 +151,32 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const isVisible = phase === 'playing' || phase === 'freezing';
 
   return (
-    <video
-      ref={videoRef}
-      src={VIDEO_SRC}
-      preload="auto"
-      playsInline
-      onLoadedMetadata={handleLoadedMetadata}
-      onEnded={handleEnded}
-      onError={handleError}
-      className="pointer-events-none"
-      style={{
-        position: 'absolute',
-        left: 430,
-        bottom: 340,
-        height: 640,
-        width: 'auto',
-        zIndex: 1,
-        objectFit: 'contain',
-        opacity: isVisible ? 1 : 0,
-        transition: `opacity ${FADE_MS}ms ease`,
-        filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.7))',
-        borderRadius: 8,
-      }}
-    />
+    <>
+      <audio ref={audioRef} src={AUDIO_SRC} preload="auto" />
+      <video
+        ref={videoRef}
+        src={VIDEO_SRC}
+        muted
+        preload="auto"
+        playsInline
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+        onError={handleError}
+        className="pointer-events-none"
+        style={{
+          position: 'absolute',
+          left: 430,
+          bottom: 340,
+          height: 640,
+          width: 'auto',
+          zIndex: 1,
+          objectFit: 'contain',
+          opacity: isVisible ? 1 : 0,
+          transition: `opacity ${FADE_MS}ms ease`,
+          filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.7))',
+          borderRadius: 8,
+        }}
+      />
+    </>
   );
 }
