@@ -1,7 +1,9 @@
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
 import { MAP_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
+import { Scene2CinematicIntro, type CinematicPhase } from './Scene2CinematicIntro';
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
@@ -29,9 +31,30 @@ export function LevelMap() {
   const progress = Math.round((completed.filter((c) => c.startsWith('stage')).length / 5) * 100);
   const nextStage = STAGE_ORDER.find((id) => id.startsWith('stage') && !completed.includes(id)) ?? 'stage1';
 
+  // Cinematic intro — plays only on first visit (no stages completed = fresh entry)
+  const isFirstVisit = completed.filter((c) => c.startsWith('stage')).length === 0;
+  const [cinematicTriggered] = useState(isFirstVisit);
+  const [cinematicPhase, setCinematicPhase] = useState<CinematicPhase>(isFirstVisit ? 'idle' : 'done');
+
+  const handleCinematicComplete = useCallback(() => {
+    setCinematicPhase('done');
+  }, []);
+
+  // Characters hidden while video is visible (playing or freezing)
+  const showCharacters = cinematicPhase === 'done';
+
   return (
     <>
-      <CharacterLayer miranda={false} advisors="large" />
+      {/* Video — at Kinky/Lily position, behind everything (z-1) */}
+      <Scene2CinematicIntro
+        trigger={cinematicTriggered}
+        onComplete={handleCinematicComplete}
+      />
+
+      {/* Static characters — fade in when video ends */}
+      <div style={{ opacity: showCharacters ? 1 : 0, transition: 'opacity 0.6s ease' }}>
+        <CharacterLayer miranda={false} advisors="large" />
+      </div>
 
       {/* Header */}
       <div className={`absolute right-[40px] z-[6] ${

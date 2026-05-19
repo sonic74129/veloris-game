@@ -9,7 +9,7 @@ export function StageHeader({ eyebrow, title, subtitle, brandLine }: StageHeader
   return (
     <div className="flex flex-col gap-1">
       <div className="eyebrow">{eyebrow}</div>
-      <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight">
+      <div className="font-cn text-[44px] tracking-[0.08em] text-warm-1 leading-tight">
         {title}
       </div>
       {brandLine && (
@@ -18,7 +18,7 @@ export function StageHeader({ eyebrow, title, subtitle, brandLine }: StageHeader
         </div>
       )}
       {subtitle && (
-        <div className="font-cns text-[14px] text-warm-2 mt-2 max-w-[860px] leading-relaxed">
+        <div className="font-cns text-[16px] text-warm-2 mt-2 max-w-[920px] leading-relaxed">
           {subtitle}
         </div>
       )}

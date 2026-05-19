@@ -132,21 +132,47 @@ const OperationsAgent = (p: IconProps) => (
     <path d="M6 20h2M32 20h2M20 6v2M20 32v2" />
   </Base>
 );
+const DataFactory = (p: IconProps) => (
+  <Base {...p}>
+    <rect x={6} y={8} width={8} height={8} rx={1} />
+    <rect x={26} y={8} width={8} height={8} rx={1} />
+    <rect x={16} y={24} width={8} height={8} rx={1} />
+    <path d="M14 12h12M10 16v6h10" />
+  </Base>
+);
+const DataScience = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx={12} cy={24} r={5} />
+    <circle cx={22} cy={14} r={5} />
+    <circle cx={30} cy={26} r={4} />
+    <path d="M15 20l4-4M24 18l3 5" />
+  </Base>
+);
+const SemanticModel = (p: IconProps) => (
+  <Base {...p}>
+    <rect x={7} y={7} width={26} height={26} rx={2} />
+    <path d="M13 13h14M13 20h14M13 27h8" />
+    <circle cx={11} cy={13} r={1} fill="currentColor" stroke="none" />
+    <circle cx={11} cy={20} r={1} fill="currentColor" stroke="none" />
+    <circle cx={11} cy={27} r={1} fill="currentColor" stroke="none" />
+  </Base>
+);
 
 // ── Stage 4
 const HostedAgent = (p: IconProps) => (
   <Base {...p}>
-    <rect x={6} y={10} width={28} height={20} rx={2} />
-    <path d="M6 16h28" />
-    <circle cx={12} cy={13} r={1} />
-    <circle cx={16} cy={13} r={1} />
-    <path d="M14 22h12M14 26h8" />
+    <circle cx={20} cy={13} r={5} />
+    <path d="M9 31c1.8-5.8 5.8-9 11-9s9.2 3.2 11 9" />
+    <rect x={12} y={25} width={16} height={7} rx={1.2} />
+    <path d="M20 18v7" />
   </Base>
 );
 const Fireworks = (p: IconProps) => (
   <Base {...p}>
-    <circle cx={20} cy={20} r={3} />
-    <path d="M20 6v6M20 28v6M6 20h6M28 20h6M10 10l4 4M30 30l-4-4M10 30l4-4M30 10l-4 4" />
+    <path d="M8 13l12-6 12 6-12 6z" />
+    <path d="M8 13v14l12 6v-14z" />
+    <path d="M32 13v14l-12 6v-14z" />
+    <path d="M20 7v6" />
   </Base>
 );
 const ControlPlane = (p: IconProps) => (
@@ -219,6 +245,9 @@ export const IconRegistry: Record<string, (p: IconProps) => React.ReactElement> 
   ontology: Ontology,
   'data-agent': DataAgent,
   'operations-agent': OperationsAgent,
+  'data-factory': DataFactory,
+  'data-science': DataScience,
+  'semantic-model': SemanticModel,
   // Stage 4
   'hosted-agent': HostedAgent,
   fireworks: Fireworks,

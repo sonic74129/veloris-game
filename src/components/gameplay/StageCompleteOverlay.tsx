@@ -7,9 +7,20 @@ interface Props {
   stageScore: StageScore | null;
   stageNumber: number;
   onNext: () => void;
+  completionTitle?: string;
+  completionMessage?: string;
+  completionButtonLabel?: string;
 }
 
-export function StageCompleteOverlay({ show, stageScore, stageNumber, onNext }: Props) {
+export function StageCompleteOverlay({
+  show,
+  stageScore,
+  stageNumber,
+  onNext,
+  completionTitle,
+  completionMessage,
+  completionButtonLabel,
+}: Props) {
   // Auto-advance after 3 seconds
   useEffect(() => {
     if (!show) return;
@@ -55,7 +66,7 @@ export function StageCompleteOverlay({ show, stageScore, stageNumber, onNext }: 
               <div className={`font-brand text-[32px] tracking-[0.14em] mt-3 ${
                 isPerfect ? 'text-gold-4' : 'text-warm-1'
               }`}>
-                Stage Completed
+                {completionTitle ?? 'Stage Completed'}
               </div>
               <div className="font-cn text-[13px] text-warm-2 mt-1 tracking-[0.14em]">
                 第 {stageNumber} 关 · {isPerfect ? '完美通关' : '通关'}
@@ -100,9 +111,11 @@ export function StageCompleteOverlay({ show, stageScore, stageNumber, onNext }: 
               )}
             </div>
 
-            {/* Miranda quote */}
+            {/* Message */}
             <div className="font-cn text-[14px] text-warm-1 italic text-center mt-6 leading-relaxed">
-              {isPerfect ? (
+              {completionMessage ? (
+                completionMessage
+              ) : isPerfect ? (
                 <>"Miranda noticed."<br />
                   <span className="text-[11px] text-warm-3 tracking-[0.14em]">— 董事长记下了你的选择</span>
                 </>
@@ -112,6 +125,15 @@ export function StageCompleteOverlay({ show, stageScore, stageNumber, onNext }: 
                 </>
               )}
             </div>
+
+            {completionButtonLabel && (
+              <button
+                onClick={onNext}
+                className="mt-6 w-full border border-gold-3 bg-gold-3/10 px-4 py-2 font-cns text-[14px] text-gold-4 hover:bg-gold-3/20 transition-colors"
+              >
+                {completionButtonLabel}
+              </button>
+            )}
           </motion.div>
 
           {/* Auto-advance hint */}

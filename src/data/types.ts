@@ -31,12 +31,21 @@ export interface GameOption {
   description?: string;
   icon?: string;          // icon key in IconRegistry
   accent: AccentColor;
+  typeLabel?: string;
+  team?: string;
+  status?: string;
+  category?: 'agent' | 'model' | 'governance';
+  targetZone?: string;
 }
 
 export interface GameSlot {
   id: string;
   label: string;
   description?: string;
+  subtitleEn?: string;
+  subtitleZh?: string;
+  dropHint?: string;
+  icon?: string;
   /** number of cards expected (default 1) */
   capacity?: number;
 }
@@ -54,6 +63,22 @@ export interface ChallengeText {
   quote?: string;
 }
 
+export interface SidebarPanelsConfig {
+  chairwomanTitle?: string;
+  chairwomanBody?: string;
+  chairwomanSignature?: string;
+  missionTitle?: string;
+  platformStatusTitle?: string;
+  hintTitle?: string;
+  hintBody?: string;
+}
+
+export interface PlatformStatusItem {
+  slotId: string;
+  label: string;
+  target: number;
+}
+
 /** correctMapping value: single id, or array of ids for multi-card slots */
 export type CorrectAnswer = string | string[];
 
@@ -63,6 +88,8 @@ export interface StageConfig {
   type: StageType;
   title: string;
   subtitle?: string;
+  storyBrief?: string;
+  storyBackgroundShort?: string;
   backgroundImage?: string;
   challenge?: ChallengeText;
   missionObjectives?: string[];
@@ -71,6 +98,11 @@ export interface StageConfig {
   options?: GameOption[];
   slots?: GameSlot[];
   correctMapping?: Record<string, CorrectAnswer>;
+  sidebarPanels?: SidebarPanelsConfig;
+  platformStatus?: PlatformStatusItem[];
+  completionTitle?: string;
+  completionMessage?: string;
+  completionButtonLabel?: string;
   /** Mark stage as a placeholder (MVP scaffold) */
   comingSoon?: boolean;
 }

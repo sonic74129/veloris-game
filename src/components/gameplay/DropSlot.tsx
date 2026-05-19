@@ -21,7 +21,7 @@ export function DropSlot({ slot, placed, status, expectedCount }: DropSlotProps)
       ref={setNodeRef}
       animate={status === 'wrong' ? { x: [0, -8, 8, -6, 6, 0] } : { x: 0 }}
       transition={{ duration: 0.45 }}
-      className={`relative rounded-lg p-4 min-h-[160px] transition-all
+      className={`relative rounded-lg p-4 min-h-[170px] transition-all
                   ${filled
                     ? 'border-[1.5px] border-gold-4 shadow-gold-glow bg-ink-2/80'
                     : isOver
@@ -32,9 +32,9 @@ export function DropSlot({ slot, placed, status, expectedCount }: DropSlotProps)
     >
       <div className="flex items-start justify-between mb-2">
         <div>
-          <div className="font-cns text-[13px] text-gold-4 font-medium">{slot.label}</div>
+          <div className="font-cns text-[15px] text-gold-4 font-medium">{slot.label}</div>
           {slot.description && (
-            <div className="font-cns text-[11px] text-warm-3 leading-[1.45] mt-1 max-w-[300px]">
+            <div className="font-cns text-[13px] text-warm-3 leading-[1.45] mt-1 max-w-[320px]">
               {slot.description}
             </div>
           )}
@@ -61,7 +61,7 @@ export function DropSlot({ slot, placed, status, expectedCount }: DropSlotProps)
                 <span style={{ color: accentHex[opt.accent] }}>
                   <Icon name={opt.icon} size={18} />
                 </span>
-                <span className="font-cns text-[11.5px] text-warm-1">{opt.title}</span>
+                <span className="font-cns text-[13px] text-warm-1">{opt.title}</span>
               </div>
             ))}
           </motion.div>
@@ -69,7 +69,7 @@ export function DropSlot({ slot, placed, status, expectedCount }: DropSlotProps)
       </AnimatePresence>
 
       {placed.length === 0 && (
-        <div className="absolute inset-x-4 bottom-3 font-mono text-[9.5px] tracking-[0.28em]
+        <div className="absolute inset-x-4 bottom-3 font-mono text-[11px] tracking-[0.24em]
                         text-warm-4 text-center pointer-events-none">
           DROP CARD HERE
         </div>

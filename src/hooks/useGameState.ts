@@ -18,6 +18,8 @@ export interface StageRunState {
 
 interface GameState {
   currentStageId: StageId;
+  viewedStoryBriefs: Record<string, boolean>;
+  activeStoryBriefStageId: StageId | null;
   unlockedStages: StageId[];
   completedStages: StageId[];
   /** slotId -> array of optionIds currently placed */
@@ -33,12 +35,16 @@ interface GameState {
   runResult: RunResult | null;
 
   setPlayer: (info: PlayerInfo) => void;
+  openStoryBriefOverlay: (stageId: StageId) => void;
+  closeStoryBriefOverlay: () => void;
+  markStoryBriefViewed: (stageId: StageId) => void;
   startStageRun: (stageId: string) => void;
   recordWrongAttempt: () => void;
   recordHintUsed: () => void;
   finishStageRun: () => StageScore | null;
 
   goToStage: (id: StageId) => void;
+  peekStage: (id: StageId) => void;
   goBack: () => void;
   completeStage: (id: StageId) => void;
   resetStage: (id: StageId) => void;
@@ -61,6 +67,8 @@ export const useGameState = create<GameState>()(
   persist(
     (set, get) => ({
       currentStageId: 'title',
+      viewedStoryBriefs: {},
+      activeStoryBriefStageId: null,
       unlockedStages: INITIAL_UNLOCKED,
       completedStages: [],
       slotAssignments: {},
@@ -75,6 +83,18 @@ export const useGameState = create<GameState>()(
       runResult: null,
 
       setPlayer: (info) => set({ player: info }),
+
+      openStoryBriefOverlay: (stageId) => set({ activeStoryBriefStageId: stageId }),
+
+      closeStoryBriefOverlay: () => set({ activeStoryBriefStageId: null }),
+
+      markStoryBriefViewed: (stageId) =>
+        set({
+          viewedStoryBriefs: {
+            ...get().viewedStoryBriefs,
+            [stageId]: true,
+          },
+        }),
 
       startStageRun: (stageId) =>
         set({ currentRun: { stageId, startTime: Date.now(), wrongAttempts: 0, hintsUsed: 0 } }),
@@ -113,6 +133,10 @@ export const useGameState = create<GameState>()(
 
       goToStage: (id) => {
         if (!get().unlockedStages.includes(id)) return;
+        set({ currentStageId: id });
+      },
+
+      peekStage: (id) => {
         set({ currentStageId: id });
       },
 
@@ -180,6 +204,8 @@ export const useGameState = create<GameState>()(
 
       hardReset: () => set({
         currentStageId: 'title',
+        viewedStoryBriefs: {},
+        activeStoryBriefStageId: null,
         unlockedStages: INITIAL_UNLOCKED,
         completedStages: [],
         slotAssignments: {},
@@ -193,6 +219,8 @@ export const useGameState = create<GameState>()(
 
       restartRun: () => set({
         currentStageId: 'title',
+        viewedStoryBriefs: {},
+        activeStoryBriefStageId: null,
         unlockedStages: INITIAL_UNLOCKED,
         completedStages: [],
         slotAssignments: {},
@@ -205,9 +233,21 @@ export const useGameState = create<GameState>()(
     }),
     {
       name: 'veloris:progress',
-      version: 1,
+      version: 2,
+      migrate: (persistedState: any, version) => {
+        if (version < 2) {
+          return {
+            ...persistedState,
+            viewedStoryBriefs: {},
+            activeStoryBriefStageId: null,
+          };
+        }
+        return persistedState;
+      },
     },
   ),
 );
 
-export { STAGE_ORDER };
+const PUZZLE_STAGES: StageId[] = ['stage1', 'stage2', 'stage3', 'stage4', 'stage5'];
+
+export { STAGE_ORDER, PUZZLE_STAGES };
