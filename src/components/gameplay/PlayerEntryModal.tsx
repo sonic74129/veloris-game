@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameState } from '../../hooks/useGameState';
 import { preloadAssets } from '../../lib/preload';
+import type { Language } from '../../data/types';
 
 export function PlayerEntryModal() {
   const player = useGameState((s) => s.player);
   const setPlayer = useGameState((s) => s.setPlayer);
   const goToStage = useGameState((s) => s.goToStage);
+  const language = useGameState((s) => s.language);
+  const setLanguage = useGameState((s) => s.setLanguage);
 
   const [name, setName] = useState(player?.name ?? '');
   const [company, setCompany] = useState(player?.company ?? '');
@@ -66,6 +69,23 @@ export function PlayerEntryModal() {
               </div>
             </div>
 
+            {/* Language selector */}
+            <div className="flex justify-center gap-2 mt-5">
+              {(['zh', 'en'] as Language[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLanguage(l)}
+                  className={`px-5 py-1.5 font-mono text-[11px] tracking-[0.28em] uppercase border transition-colors
+                    ${ language === l
+                      ? 'border-gold-3 text-gold-4 bg-gold-3/10'
+                      : 'border-warm-4 text-warm-3 hover:border-gold-2 hover:text-warm-2'
+                    }`}
+                >
+                  {l === 'zh' ? '中文' : 'English'}
+                </button>
+              ))}
+            </div>
+
             {/* Divider */}
             <div className="h-px bg-gradient-to-r from-transparent via-gold-2 to-transparent my-6" />
 
@@ -73,11 +93,11 @@ export function PlayerEntryModal() {
             <div className="flex flex-col gap-5">
               <div>
                 <label className="font-mono text-[10px] tracking-[0.32em] text-warm-3 block mb-2">
-                  NAME · 姓名
+                  {language === 'zh' ? 'NAME · 姓名' : 'NAME'}
                 </label>
                 <input
                   type="text"
-                  placeholder="Your name"
+                  placeholder={language === 'zh' ? 'Your name · 你的名字' : 'Your name'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -89,11 +109,11 @@ export function PlayerEntryModal() {
               </div>
               <div>
                 <label className="font-mono text-[10px] tracking-[0.32em] text-warm-3 block mb-2">
-                  COMPANY · 公司
+                  {language === 'zh' ? 'COMPANY · 公司' : 'COMPANY'}
                 </label>
                 <input
                   type="text"
-                  placeholder="Your company"
+                  placeholder={language === 'zh' ? 'Your company · 你的公司' : 'Your company'}
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -113,7 +133,7 @@ export function PlayerEntryModal() {
                            text-ink-0 font-cns font-medium tracking-[0.2em] text-[13px]
                            transition-colors shadow-gold-glow disabled:shadow-none"
               >
-                Enter the Challenge · 进入试炼 →
+                {language === 'zh' ? 'Enter the Challenge · 进入试炼 →' : 'Enter the Challenge →'}
               </button>
             </div>
 
