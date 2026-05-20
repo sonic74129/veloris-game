@@ -45,9 +45,16 @@ function getCtx(): AudioContext | null {
 }
 
 // Connect BGM audio element through gain node. Idempotent.
+// IMPORTANT: createMediaElementSource on iOS silently routes element output to
+// the AudioContext destination — if the ctx is still suspended at that moment,
+// the audio plays silently forever. So we only connect once ctx is running.
 function connectGraph() {
   const ctx = getCtx();
   if (!ctx || _sourceNode) return;
+  if (ctx.state !== 'running') {
+    ctx.resume().then(() => connectGraph()).catch(() => {});
+    return;
+  }
   try {
     const a = audio();
     _sourceNode = ctx.createMediaElementSource(a);
@@ -76,8 +83,14 @@ function unlockAudio() {
     src.buffer = buffer;
     src.connect(ctx.destination);
     src.start(0);
-    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-    connectGraph();
+    // Resume context FIRST, then connect graph. createMediaElementSource on
+    // suspended ctx silences the element output on iOS.
+    const after = () => connectGraph();
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(after).catch(after);
+    } else {
+      after();
+    }
   } catch { /* noop */ }
 }
 

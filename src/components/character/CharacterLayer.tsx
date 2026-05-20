@@ -44,7 +44,7 @@ export function CharacterLayer({
       ? { left: 40, top: 110, width: 460, height: 820 }
       : variant === 'side'
       ? (isMobile
-          ? { left: 8, top: 70, width: 200, height: 420 }
+          ? { left: 4, top: 70, width: 170, height: 360 }
           : { left: 30, top: 120, width: 280, height: 600 })
       : { left: 50, top: 120, width: 360, height: 700 };
 
