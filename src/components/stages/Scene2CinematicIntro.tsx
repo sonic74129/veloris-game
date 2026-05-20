@@ -42,13 +42,13 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const startBgmDuck = useCallback(() => {
     if (duckActiveRef.current) return;
     duckActiveRef.current = true;
-    window.dispatchEvent(new Event('veloris:vo:start'));
+    document.dispatchEvent(new Event('veloris:vo:start'));
   }, []);
 
   const endBgmDuck = useCallback(() => {
     if (!duckActiveRef.current) return;
     duckActiveRef.current = false;
-    window.dispatchEvent(new Event('veloris:vo:end'));
+    document.dispatchEvent(new Event('veloris:vo:end'));
   }, []);
 
   // Cleanup
