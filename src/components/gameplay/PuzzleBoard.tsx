@@ -1,7 +1,9 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext, DragOverlay, PointerSensor, TouchSensor, useDroppable, useSensor, useSensors,
-  type DragEndEvent, type DragStartEvent,
+  pointerWithin, rectIntersection,
+  type CollisionDetection, type DragEndEvent, type DragMoveEvent, type DragStartEvent,
 } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
 import type { GameOption, GameSlot, StageConfig } from '../../data/types';
@@ -9,6 +11,7 @@ import { DragOptionCard } from './DragOptionCard';
 import { DropSlot } from './DropSlot';
 import { useGameState } from '../../hooks/useGameState';
 import { accentHex } from '../../lib/accent';
+import { useCanvasScaleValue } from '../../lib/mobile';
 import { Icon } from '../icons/Icon';
 
 interface PuzzleBoardProps {
@@ -27,6 +30,7 @@ export function PuzzleBoard({
   onWrong,
   showOptionDescriptions = false,
 }: PuzzleBoardProps) {
+  const canvasScale = useCanvasScaleValue();
   const slots = stage.slots ?? [];
   const options = stage.options ?? [];
   const correctMap = stage.correctMapping ?? {};
@@ -42,10 +46,83 @@ export function PuzzleBoard({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [stage1Feedback, setStage1Feedback] = useState<string | null>(null);
   const [stage4Feedback, setStage4Feedback] = useState<string | null>(null);
+  const [manualOverSlotId, setManualOverSlotId] = useState<string | null>(null);
+  const pointerRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const onMouseMove = (event: MouseEvent) => {
+      pointerRef.current = { x: event.clientX, y: event.clientY };
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      pointerRef.current = { x: event.clientX, y: event.clientY };
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (touch) {
+        pointerRef.current = { x: touch.clientX, y: touch.clientY };
+      }
+    };
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
+
+  const readPointFromEvent = (ev: unknown): { x: number; y: number } | null => {
+    if (!ev || typeof ev !== 'object') return null;
+    const e = ev as MouseEvent | PointerEvent | TouchEvent;
+    if ('touches' in e && e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    const pe = e as MouseEvent | PointerEvent;
+    if (typeof pe.clientX === 'number' && typeof pe.clientY === 'number') {
+      return { x: pe.clientX, y: pe.clientY };
+    }
+    return null;
+  };
+
+  const updateStage1ManualOver = (point: { x: number; y: number } | null) => {
+    if (stage.id !== 'stage1') return;
+    if (!point) {
+      setManualOverSlotId(null);
+      return;
+    }
+    const el = document.elementFromPoint(point.x, point.y) as HTMLElement | null;
+    const slotEl = el?.closest('[data-stage1-slot-id]') as HTMLElement | null;
+    const slotId = slotEl?.dataset.stage1SlotId ?? null;
+    setManualOverSlotId((prev) => (prev === slotId ? prev : slotId));
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
+  );
+
+  const pointerFirstCollision = useMemo<CollisionDetection>(
+    () => (args) => {
+      let normalizedPointer = args.pointerCoordinates;
+      if (normalizedPointer && typeof document !== 'undefined') {
+        const canvas = document.querySelector('.canvas-1920') as HTMLElement | null;
+        if (canvas) {
+          const safeScale = Math.max(canvasScale, 0.01);
+          normalizedPointer = {
+            x: normalizedPointer.x / safeScale + canvas.offsetLeft,
+            y: normalizedPointer.y / safeScale + canvas.offsetTop,
+          };
+        }
+      }
+
+      const pointerHits = pointerWithin({
+        ...args,
+        pointerCoordinates: normalizedPointer,
+      });
+      return pointerHits.length > 0 ? pointerHits : rectIntersection(args);
+    },
+    [canvasScale],
   );
 
   const optionsById = useMemo(() => {
@@ -80,12 +157,52 @@ export function PuzzleBoard({
     queueMicrotask(onComplete);
   }
 
-  const handleDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
+  const dragStartPointRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleDragStart = (e: DragStartEvent) => {
+    setActiveId(String(e.active.id));
+    setManualOverSlotId(null);
+    const p = readPointFromEvent((e as unknown as { activatorEvent?: unknown }).activatorEvent);
+    if (p) {
+      pointerRef.current = p;
+      dragStartPointRef.current = p;
+      updateStage1ManualOver(p);
+    } else {
+      dragStartPointRef.current = pointerRef.current;
+    }
+  };
+
+  const handleDragMove = (e: DragMoveEvent) => {
+    // activatorEvent is the START event and never updates — using it freezes
+    // the hover target on the drag origin. Compute current pointer from
+    // startPoint + delta, falling back to the live window pointer tracker.
+    const start = dragStartPointRef.current;
+    const delta = (e as unknown as { delta?: { x: number; y: number } }).delta;
+    const computed = start && delta
+      ? { x: start.x + delta.x, y: start.y + delta.y }
+      : null;
+    const p = computed ?? pointerRef.current;
+    if (p) {
+      pointerRef.current = p;
+      updateStage1ManualOver(p);
+    }
+  };
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveId(null);
     const optionId = String(e.active.id);
-    const slotId = e.over ? String(e.over.id) : null;
+    const stage1ManualTarget = stage.id === 'stage1' ? manualOverSlotId : null;
+    let slotId = stage1ManualTarget ?? (e.over ? String(e.over.id) : null);
+    if (!slotId && stage.id === 'stage1') {
+      const p = pointerRef.current;
+      if (p) {
+        updateStage1ManualOver(p);
+        const el = document.elementFromPoint(p.x, p.y) as HTMLElement | null;
+        const slotEl = el?.closest('[data-stage1-slot-id]') as HTMLElement | null;
+        slotId = slotEl?.dataset.stage1SlotId ?? null;
+      }
+    }
+    setManualOverSlotId(null);
     if (!slotId) return;
 
     if (stage.id === 'stage1' && slotId === 'slot-app-modernization') {
@@ -123,7 +240,9 @@ export function PuzzleBoard({
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={pointerFirstCollision}
       onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
     >
       {/* Slots area */}
@@ -133,6 +252,7 @@ export function PuzzleBoard({
           optionsById={optionsById}
           correctMap={correctMap}
           wrongSlotId={wrongSlotId}
+          manualOverSlotId={manualOverSlotId}
         />
       ) : stage.id === 'stage4' ? (
         <Stage4ConsolidationBoard
@@ -235,28 +355,33 @@ export function PuzzleBoard({
         )}
       </div>
 
-      <DragOverlay>
-        {activeOption && (
-          <motion.div
-            initial={{ scale: 1 }}
-            animate={{ scale: 1.05 }}
-            style={{
-              borderColor: accentHex[activeOption.accent],
-              boxShadow: `0 0 32px ${accentHex[activeOption.accent]}55, 0 20px 40px rgba(0,0,0,0.7)`,
-            }}
-            className="w-[200px] rounded-lg border-[1.5px] bg-ink-2/95 p-3"
-          >
-            <div className="flex items-start gap-2">
-              <span style={{ color: accentHex[activeOption.accent] }}>
-                <Icon name={activeOption.icon} size={28} />
-              </span>
-              <div className="font-cns text-[12.5px] text-warm-1 leading-tight">
-                {activeOption.title}
-              </div>
-            </div>
-          </motion.div>
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <DragOverlay>
+            {activeOption && (
+              <motion.div
+                initial={{ scale: 1 }}
+                animate={{ scale: 1.05 }}
+                style={{
+                  pointerEvents: 'none',
+                  borderColor: accentHex[activeOption.accent],
+                  boxShadow: `0 0 32px ${accentHex[activeOption.accent]}55, 0 20px 40px rgba(0,0,0,0.7)`,
+                }}
+                className="w-[200px] rounded-lg border-[1.5px] bg-ink-2/95 p-3"
+              >
+                <div className="flex items-start gap-2">
+                  <span style={{ color: accentHex[activeOption.accent] }}>
+                    <Icon name={activeOption.icon} size={28} />
+                  </span>
+                  <div className="font-cns text-[12.5px] text-warm-1 leading-tight">
+                    {activeOption.title}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </DragOverlay>,
+          document.body,
         )}
-      </DragOverlay>
     </DndContext>
   );
 }
@@ -342,6 +467,7 @@ function Stage4ZoneCard({
   return (
     <motion.div
       ref={setNodeRef}
+      data-droppable-id={slot.id}
       animate={status === 'wrong' ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
       transition={{ duration: 0.45 }}
       className={`rounded-lg border p-3 transition-all ${
@@ -558,6 +684,7 @@ function Stage3DropNode({
   return (
     <motion.div
       ref={setNodeRef}
+      data-droppable-id={slotId}
       animate={{
         x: status === 'wrong' ? [0, -7, 7, -5, 5, 0] : 0,
         boxShadow: allCorrect
@@ -814,6 +941,7 @@ function CBarSlot({
   return (
     <motion.div
       ref={setNodeRef}
+      data-droppable-id={slotId}
       animate={status === 'wrong' ? { y: [0, -3, 3, -2, 2, 0] } : { y: 0 }}
       transition={{ duration: 0.45 }}
       className={`rounded-lg border px-3 py-2 ${
@@ -889,6 +1017,7 @@ function SecurityDropSlot({
   return (
     <motion.div
       ref={setNodeRef}
+      data-droppable-id={slotId}
       animate={status === 'wrong' ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
       transition={{ duration: 0.45 }}
       className={`rounded-[10px] border-[1.5px] p-3 ${horizontal ? 'mt-1' : ''} ${
@@ -940,11 +1069,13 @@ function Stage1Pipeline({
   optionsById,
   correctMap,
   wrongSlotId,
+  manualOverSlotId,
 }: {
   assignments: Record<string, string[]>;
   optionsById: Record<string, GameOption>;
   correctMap: Record<string, string | string[]>;
   wrongSlotId: string | null;
+  manualOverSlotId: string | null;
 }) {
   const q1Placed = (assignments['slot-legacy-assessment'] ?? []).map((id) => optionsById[id]).filter(Boolean);
   const q2Placed = (assignments['slot-app-modernization'] ?? []).map((id) => optionsById[id]).filter(Boolean);
@@ -973,6 +1104,7 @@ function Stage1Pipeline({
         description="我们不知道有哪些老旧应用，也不知道该先改哪些系统。"
         placed={q1Placed}
         status={q1Status}
+        forcedIsOver={manualOverSlotId === 'slot-legacy-assessment'}
         chips={q1Solved ? ['发现应用版图', '梳理依赖关系', '评估迁移就绪度', '识别现代化优先级'] : []}
       />
 
@@ -996,6 +1128,7 @@ function Stage1Pipeline({
         placed={q2Placed}
         status={q2Status}
         locked={!q1Solved}
+        forcedIsOver={manualOverSlotId === 'slot-app-modernization'}
         chips={q2Solved ? ['代码评估', '框架升级', '修复 Build / CVE', '生成测试', '容器化'] : []}
       />
 
@@ -1018,6 +1151,7 @@ function Stage1QuestionNode({
   placed,
   status,
   locked,
+  forcedIsOver,
   chips,
 }: {
   slotId: string;
@@ -1026,14 +1160,18 @@ function Stage1QuestionNode({
   placed: GameOption[];
   status: 'idle' | 'correct' | 'wrong';
   locked?: boolean;
+  forcedIsOver?: boolean;
   chips: string[];
 }) {
   const { isOver, setNodeRef } = useDroppable({ id: slotId, disabled: locked });
   const solved = status === 'correct';
+  const over = forcedIsOver || isOver;
 
   return (
     <div
       ref={setNodeRef}
+      data-droppable-id={slotId}
+      data-stage1-slot-id={slotId}
       className={`rounded-lg border p-3 min-h-[230px] transition-all ${
         solved
           ? 'border-gold-4 shadow-gold-glow bg-ink-2/80'
@@ -1041,7 +1179,7 @@ function Stage1QuestionNode({
           ? 'border-accent-red bg-ink-2/70'
           : locked
           ? 'border-gold-2/20 bg-ink-2/30 opacity-60'
-          : isOver
+          : over
           ? 'border-gold-4 shadow-gold-soft bg-ink-2/75'
           : 'border-gold-2/50 bg-ink-2/65'
       }`}

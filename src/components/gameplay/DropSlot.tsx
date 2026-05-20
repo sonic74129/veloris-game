@@ -19,6 +19,7 @@ export function DropSlot({ slot, placed, status, expectedCount }: DropSlotProps)
   return (
     <motion.div
       ref={setNodeRef}
+      data-droppable-id={slot.id}
       animate={status === 'wrong' ? { x: [0, -8, 8, -6, 6, 0] } : { x: 0 }}
       transition={{ duration: 0.45 }}
       className={`relative rounded-lg p-4 min-h-[170px] transition-all

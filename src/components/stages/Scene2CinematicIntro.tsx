@@ -37,6 +37,19 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
   const earlyCutTriggered = useRef(false);
+  const duckActiveRef = useRef(false);
+
+  const startBgmDuck = useCallback(() => {
+    if (duckActiveRef.current) return;
+    duckActiveRef.current = true;
+    window.dispatchEvent(new Event('veloris:vo:start'));
+  }, []);
+
+  const endBgmDuck = useCallback(() => {
+    if (!duckActiveRef.current) return;
+    duckActiveRef.current = false;
+    window.dispatchEvent(new Event('veloris:vo:end'));
+  }, []);
 
   // Cleanup
   useEffect(() => {
@@ -44,8 +57,9 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       cancelAnimationFrame(rafRef.current);
       videoRef.current?.pause();
       audioRef.current?.pause();
+      endBgmDuck();
     };
-  }, []);
+  }, [endBgmDuck]);
 
   // RAF loop: handle early cut (fade to black before video end)
   const startLoop = useCallback(() => {
@@ -59,6 +73,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         v.pause();
         if (audioRef.current) audioRef.current.pause();
         cancelAnimationFrame(rafRef.current);
+        endBgmDuck();
         setPhase('freezing');
         setTimeout(() => {
           setPhase('done');
@@ -70,7 +85,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
-  }, [onComplete]);
+  }, [onComplete, endBgmDuck]);
 
   // Start playback
   useEffect(() => {
@@ -93,6 +108,9 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         return;
       }
 
+      // Duck BGM while cinematic SFX is playing
+      startBgmDuck();
+
       // Play audio SFX (separate element, reliable autoplay)
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
@@ -114,6 +132,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
       const timeout = setTimeout(() => {
         video.removeEventListener('canplay', onCanPlay);
         if (phase === 'idle') {
+          endBgmDuck();
           setPhase('done');
           onComplete();
         }
@@ -124,7 +143,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         video.removeEventListener('canplay', onCanPlay);
       };
     }
-  }, [trigger, phase, onComplete, startLoop]);
+  }, [trigger, phase, onComplete, startLoop, startBgmDuck, endBgmDuck]);
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) durationRef.current = videoRef.current.duration;
@@ -134,20 +153,22 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
     if (phase !== 'done') {
       cancelAnimationFrame(rafRef.current);
       audioRef.current?.pause();
+      endBgmDuck();
       setPhase('done');
       onComplete();
     }
-  }, [phase, onComplete]);
+  }, [phase, onComplete, endBgmDuck]);
 
   const handleEnded = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     audioRef.current?.pause();
+    endBgmDuck();
     setPhase('freezing');
     setTimeout(() => {
       setPhase('done');
       onComplete();
     }, FREEZE_MS);
-  }, [onComplete]);
+  }, [onComplete, endBgmDuck]);
 
   // Video is hidden once done (parent shows static characters)
   const isVisible = phase === 'playing' || phase === 'freezing';
