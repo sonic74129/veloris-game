@@ -93,8 +93,14 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
       // Play audio SFX (separate element, reliable autoplay)
       if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
+        const sfx = audioRef.current;
+        sfx.currentTime = 0;
+        const playSfx = () => { sfx.play().catch(() => {}); };
+        if (sfx.readyState >= 3) {
+          playSfx();
+        } else {
+          sfx.addEventListener('canplay', playSfx, { once: true });
+        }
       }
 
       startLoop();

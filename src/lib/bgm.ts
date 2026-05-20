@@ -21,8 +21,6 @@ function audio(): HTMLAudioElement {
     _audio.loop = true;
     _audio.volume = BGM_FULL;
     _audio.preload = 'auto';
-    // iOS Safari needs CORS-friendly playback on cross-origin assets; not needed for same-origin.
-    _audio.crossOrigin = 'anonymous';
   }
   return _audio;
 }
@@ -73,15 +71,42 @@ export function initBgm(
   const tryStart = () => {
     unlockAudio();
     if (_started) return;
-    if (localStorage.getItem(BGM_MUTED_KEY) === '1') return;
+    if (localStorage.getItem(BGM_MUTED_KEY) === '1') {
+      // Remove gesture listeners — user explicitly muted
+      removeGestureListeners();
+      return;
+    }
     _started = true;
-    if (!a.src) a.src = baseUrl + 'assets/bgm.mp3';
-    a.play().then(() => _onStateChange?.(true)).catch(() => { _started = false; });
+    const a2 = audio();
+    if (!a2.src) a2.src = baseUrl + 'assets/bgm.mp3';
+
+    const attemptPlay = () => {
+      a2.play().then(() => {
+        _onStateChange?.(true);
+        a2.removeEventListener('canplay', attemptPlay);
+        removeGestureListeners();
+      }).catch(() => {
+        // Play rejected — allow next gesture to retry
+        _started = false;
+        a2.addEventListener('canplay', attemptPlay, { once: true });
+      });
+    };
+
+    if (a2.readyState >= 3) {
+      attemptPlay();
+    } else {
+      a2.addEventListener('canplay', attemptPlay, { once: true });
+    }
   };
 
-  document.addEventListener('click',     tryStart, { once: true, capture: true });
-  document.addEventListener('keydown',   tryStart, { once: true });
-  document.addEventListener('touchend',  tryStart, { once: true, capture: true });
+  // Keep listeners active — iOS may need multiple gestures before audio works
+  const gestureHandler = () => { tryStart(); };
+  const removeGestureListeners = () => {
+    document.removeEventListener('click',    gestureHandler, { capture: true });
+    document.removeEventListener('touchend', gestureHandler, { capture: true });
+  };
+  document.addEventListener('click',     gestureHandler, { capture: true });
+  document.addEventListener('touchend',  gestureHandler, { capture: true });
   document.addEventListener('touchstart', unlockAudio, { once: true, capture: true });
 
   // Reference-counted ducking so concurrent VO dispatches don't double-duck or prematurely restore.
@@ -97,9 +122,8 @@ export function initBgm(
   document.addEventListener('veloris:vo:end',   onVoEnd);
 
   return () => {
-    document.removeEventListener('click',            tryStart, { capture: true });
-    document.removeEventListener('keydown',          tryStart);
-    document.removeEventListener('touchend',         tryStart, { capture: true });
+    document.removeEventListener('click',            gestureHandler, { capture: true });
+    document.removeEventListener('touchend',         gestureHandler, { capture: true });
     document.removeEventListener('touchstart',       unlockAudio, { capture: true });
     document.removeEventListener('veloris:vo:start', onVoStart);
     document.removeEventListener('veloris:vo:end',   onVoEnd);

@@ -54,13 +54,30 @@ export function SingleFileVoiceoverPlayer({
     const el = audioRef.current;
     if (!el) return;
     setStatus('playing');
-    el.play().then(() => {
-      // Only duck BGM after play actually succeeds
-      document.dispatchEvent(new CustomEvent('veloris:vo:start'));
-    }).catch(() => {
-      setStatus('blocked');
-      // Play was blocked — BGM was never ducked, nothing to restore
-    });
+
+    const attemptPlay = () => {
+      el.play().then(() => {
+        // Only duck BGM after play actually succeeds
+        document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+      }).catch(() => {
+        // iOS: audio not ready — retry once on canplay, then give up
+        if (el.readyState < 3) {
+          el.addEventListener('canplay', () => {
+            el.play().then(() => {
+              document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+            }).catch(() => { setStatus('blocked'); });
+          }, { once: true });
+        } else {
+          setStatus('blocked');
+        }
+      });
+    };
+
+    if (el.readyState >= 3) {
+      attemptPlay();
+    } else {
+      el.addEventListener('canplay', attemptPlay, { once: true });
+    }
   }, []);
 
   const replay = useCallback(() => {
