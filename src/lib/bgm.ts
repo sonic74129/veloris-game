@@ -13,6 +13,7 @@ let _audio: HTMLAudioElement | null = null;
 let _started = false;
 let _onStateChange: ((playing: boolean) => void) | null = null;
 let _fadeId: ReturnType<typeof setInterval> | null = null;
+let _duckCount = 0;
 
 function audio(): HTMLAudioElement {
   if (!_audio) {
@@ -20,8 +21,30 @@ function audio(): HTMLAudioElement {
     _audio.loop = true;
     _audio.volume = BGM_FULL;
     _audio.preload = 'auto';
+    // iOS Safari needs CORS-friendly playback on cross-origin assets; not needed for same-origin.
+    _audio.crossOrigin = 'anonymous';
   }
   return _audio;
+}
+
+// iOS Safari requires AudioContext to be created/resumed inside a user gesture handler.
+// Unlock once on the first user interaction so subsequent HTMLAudioElement plays succeed.
+let _audioUnlocked = false;
+function unlockAudio() {
+  if (_audioUnlocked) return;
+  _audioUnlocked = true;
+  try {
+    const Ctx = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ctx.destination);
+    src.start(0);
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+  } catch { /* noop */ }
 }
 
 export function fade(target: number, ms = FADE_MS) {
@@ -48,35 +71,49 @@ export function initBgm(
   const a = audio();
 
   const tryStart = () => {
+    unlockAudio();
     if (_started) return;
     if (localStorage.getItem(BGM_MUTED_KEY) === '1') return;
     _started = true;
     if (!a.src) a.src = baseUrl + 'assets/bgm.mp3';
-    a.play().then(() => _onStateChange?.(true)).catch(() => {});
+    a.play().then(() => _onStateChange?.(true)).catch(() => { _started = false; });
   };
 
-  document.addEventListener('click',   tryStart, { once: true, capture: true });
-  document.addEventListener('keydown', tryStart, { once: true });
+  document.addEventListener('click',     tryStart, { once: true, capture: true });
+  document.addEventListener('keydown',   tryStart, { once: true });
+  document.addEventListener('touchend',  tryStart, { once: true, capture: true });
+  document.addEventListener('touchstart', unlockAudio, { once: true, capture: true });
 
-  const onVoStart = () => fade(BGM_DUCKED);
-  const onVoEnd   = () => fade(BGM_FULL);
+  // Reference-counted ducking so concurrent VO dispatches don't double-duck or prematurely restore.
+  const onVoStart = () => {
+    _duckCount++;
+    if (_duckCount === 1) fade(BGM_DUCKED);
+  };
+  const onVoEnd = () => {
+    _duckCount = Math.max(0, _duckCount - 1);
+    if (_duckCount === 0) fade(BGM_FULL);
+  };
   document.addEventListener('veloris:vo:start', onVoStart);
   document.addEventListener('veloris:vo:end',   onVoEnd);
 
   return () => {
     document.removeEventListener('click',            tryStart, { capture: true });
     document.removeEventListener('keydown',          tryStart);
+    document.removeEventListener('touchend',         tryStart, { capture: true });
+    document.removeEventListener('touchstart',       unlockAudio, { capture: true });
     document.removeEventListener('veloris:vo:start', onVoStart);
     document.removeEventListener('veloris:vo:end',   onVoEnd);
     a.pause();
     a.src = '';
     _audio   = null;
     _started = false;
+    _duckCount = 0;
   };
 }
 
 /** Toggle mute/unmute — called from BottomNav button. */
 export function toggleBgm(onStateChange: (playing: boolean) => void) {
+  unlockAudio();
   const a = audio();
   if (!a.paused) {
     a.pause();
@@ -85,7 +122,7 @@ export function toggleBgm(onStateChange: (playing: boolean) => void) {
   } else {
     if (!a.src) a.src = import.meta.env.BASE_URL + 'assets/bgm.mp3';
     _started = true;
-    a.play().then(() => onStateChange(true)).catch(() => {});
+    a.play().then(() => onStateChange(true)).catch(() => { _started = false; onStateChange(false); });
     localStorage.removeItem(BGM_MUTED_KEY);
   }
 }

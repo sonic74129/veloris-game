@@ -24,19 +24,18 @@ export function MissionBriefing({ stage }: Props) {
   const ui = packs[language].ui;
   const isMobile = useMobile();
 
-  // Pre-duck BGM as soon as this stage mounts (before VO loads)
+  // Ensure BGM is restored to full volume on unmount in case a VO was still active
   useEffect(() => {
-    document.dispatchEvent(new CustomEvent('veloris:vo:start'));
     return () => { document.dispatchEvent(new CustomEvent('veloris:vo:end')); };
   }, []);
 
   return (
     <>
-      <CharacterLayer variant="left-large" />
+      {!isMobile && <CharacterLayer variant="left-large" />}
 
       <div className={`absolute flex gap-8 ${
         isMobile
-          ? 'top-[60px] left-[400px] right-[30px] bottom-[55px]'
+          ? 'top-[55px] left-[20px] right-[20px] bottom-[75px] flex-col'
           : 'top-[110px] left-[540px] right-[60px] bottom-[100px]'
       }`}>
         {/* Center: header + challenge */}

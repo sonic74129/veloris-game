@@ -65,10 +65,12 @@ export function LevelMap() {
         onComplete={handleCinematicComplete}
       />
 
-      {/* Static characters — fade in when video ends */}
-      <div style={{ opacity: showCharacters ? 1 : 0, transition: 'opacity 0.6s ease' }}>
-        <CharacterLayer miranda={false} advisors="large" />
-      </div>
+      {/* Static characters — fade in when video ends; hidden on mobile to free up space */}
+      {!isMobile && (
+        <div style={{ opacity: showCharacters ? 1 : 0, transition: 'opacity 0.6s ease' }}>
+          <CharacterLayer miranda={false} advisors="large" />
+        </div>
+      )}
 
       {/* Header */}
       <div className={`absolute right-[40px] z-[6] ${
@@ -126,10 +128,10 @@ export function LevelMap() {
       {/* Stage nodes */}
       <div className={`absolute z-[6] overflow-y-auto ${
         isMobile
-          ? 'left-[30px] right-[30px] top-[280px] bottom-[75px]'
+          ? 'left-[20px] right-[20px] top-[200px] bottom-[75px]'
           : 'left-[60px] right-[60px] bottom-[110px]'
       }`}>
-        <div className={`grid gap-4 relative ${isMobile ? 'grid-cols-5' : 'grid-cols-5'}`}>
+        <div className={`grid gap-3 relative ${isMobile ? 'grid-cols-2' : 'grid-cols-5'}`}>
           <div className="absolute top-[60px] left-[4%] right-[4%] h-px
                           bg-gradient-to-r from-transparent via-gold-2 to-transparent" />
           {MAP_NODES.map((node, idx) => {

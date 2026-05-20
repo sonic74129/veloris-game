@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import {
   DndContext, DragOverlay, PointerSensor, TouchSensor, useDroppable, useSensor, useSensors,
-  type DragEndEvent, type DragStartEvent, type Modifier,
+  type DragEndEvent, type DragStartEvent,
 } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
 import type { GameOption, GameSlot, StageConfig } from '../../data/types';
@@ -10,7 +10,6 @@ import { DropSlot } from './DropSlot';
 import { useGameState } from '../../hooks/useGameState';
 import { accentHex } from '../../lib/accent';
 import { Icon } from '../icons/Icon';
-import { useCanvasScale } from '../../lib/scale';
 
 interface PuzzleBoardProps {
   stage: StageConfig;
@@ -28,19 +27,9 @@ export function PuzzleBoard({
   onWrong,
   showOptionDescriptions = false,
 }: PuzzleBoardProps) {
-  const { scale } = useCanvasScale();
   const slots = stage.slots ?? [];
   const options = stage.options ?? [];
   const correctMap = stage.correctMapping ?? {};
-
-  // GameShell uses CSS transform scale(), so pointer deltas need compensation.
-  const scaleModifier: Modifier = useMemo(() => {
-    return ({ transform }) => ({
-      ...transform,
-      x: transform.x / scale,
-      y: transform.y / scale,
-    });
-  }, [scale]);
 
   // Stable shuffle of options keyed on stage.id so the visual order doesn't
   // trivially reveal the correct answer, but stays stable across re-renders.
@@ -134,7 +123,6 @@ export function PuzzleBoard({
   return (
     <DndContext
       sensors={sensors}
-      modifiers={[scaleModifier]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
