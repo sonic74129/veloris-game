@@ -38,6 +38,16 @@ export function LevelMap() {
     setCinematicPhase('done');
   }, []);
 
+  // Nuclear safety net: if cinematic doesn't complete within 12s, force it.
+  // This guarantees characters + dialogue always appear on mobile.
+  useEffect(() => {
+    if (!isFirstVisit || cinematicPhase === 'done') return;
+    const safety = setTimeout(() => {
+      setCinematicPhase('done');
+    }, 12000);
+    return () => clearTimeout(safety);
+  }, [isFirstVisit, cinematicPhase]);
+
   // Voiceover starts after video finishes (cinematicPhase==='done'), with 1s delay
   const [voiceoverReady, setVoiceoverReady] = useState(!isFirstVisit);
   useEffect(() => {
