@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
@@ -7,7 +7,6 @@ import { Scene2CinematicIntro, type CinematicPhase } from './Scene2CinematicIntr
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { ensureAudioUnlocked } from '../../lib/bgm';
 
 const MAP_NODES: { id: StageId; title: string; subtitle: string }[] = [
   { id: 'stage1', title: 'Agent-Ready Application', subtitle: '现代化关键 Java / .NET 应用，让 Agent 可安全接入' },
@@ -32,25 +31,8 @@ export function LevelMap() {
 
   // Cinematic intro — plays only on first visit (no stages completed = fresh entry)
   const isFirstVisit = completed.filter((c) => c.startsWith('stage')).length === 0;
-  // Gate cinematic behind a user tap so iOS audio context gets unlocked
-  const [userTapped, setUserTapped] = useState(!isFirstVisit);
-  const cinematicTriggered = userTapped && isFirstVisit;
+  const [cinematicTriggered] = useState(isFirstVisit);
   const [cinematicPhase, setCinematicPhase] = useState<CinematicPhase>(isFirstVisit ? 'idle' : 'done');
-
-  // Warm up audio element on user tap to unlock iOS audio pipeline
-  const warmAudioRef = useRef<HTMLAudioElement | null>(null);
-  const handleTapToStart = useCallback(() => {
-    ensureAudioUnlocked();
-    // Play a tiny silent buffer on a real audio element to unlock HTMLAudioElement playback
-    if (!warmAudioRef.current) {
-      const a = new Audio();
-      a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
-      a.volume = 0.01;
-      a.play().catch(() => {});
-      warmAudioRef.current = a;
-    }
-    setUserTapped(true);
-  }, []);
 
   const handleCinematicComplete = useCallback(() => {
     setCinematicPhase('done');
@@ -72,38 +54,16 @@ export function LevelMap() {
 
   // iOS fallback: if cinematic callback never arrives, still show characters + dialogue.
   useEffect(() => {
-    if (!isFirstVisit || !userTapped || cinematicPhase === 'done' || voiceoverReady) return;
+    if (!isFirstVisit || cinematicPhase === 'done' || voiceoverReady) return;
     const timer = setTimeout(() => setVoiceoverReady(true), 8000);
     return () => clearTimeout(timer);
-  }, [isFirstVisit, userTapped, cinematicPhase, voiceoverReady]);
+  }, [isFirstVisit, cinematicPhase, voiceoverReady]);
 
   // Characters hidden while video is visible (playing or freezing)
   const showCharacters = cinematicPhase === 'done' || voiceoverReady;
 
   return (
     <>
-      {/* Tap-to-start overlay for first visit (unlocks iOS audio) */}
-      {isFirstVisit && !userTapped && (
-        <div
-          className="absolute inset-0 z-[50] flex items-center justify-center cursor-pointer"
-          style={{ background: 'rgba(6,4,2,0.85)' }}
-          onClick={handleTapToStart}
-        >
-          <motion.div
-            className="flex flex-col items-center gap-6"
-            animate={{ opacity: [0.6, 1, 0.6] }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-          >
-            <div className="font-mono text-[14px] tracking-[0.4em] text-gold-3 uppercase">
-              TAP TO START
-            </div>
-            <div className="font-cns text-[18px] text-warm-2">
-              点击屏幕开始
-            </div>
-          </motion.div>
-        </div>
-      )}
-
       {/* Video — at Kinky/Lily position, behind everything (z-1) */}
       <Scene2CinematicIntro
         trigger={cinematicTriggered}
