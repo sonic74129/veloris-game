@@ -10,7 +10,7 @@ export function StageHeader({ eyebrow, title, subtitle, brandLine, compact = fal
   return (
     <div className="flex flex-col gap-1">
       <div className="eyebrow">{eyebrow}</div>
-      <div className={`font-cn tracking-[0.08em] text-warm-1 leading-tight ${compact ? 'text-[30px]' : 'text-[44px]'}`}>
+      <div className={`font-cn tracking-[0.08em] text-warm-1 leading-tight ${compact ? 'text-[20px]' : 'text-[44px]'}`}>
         {title}
       </div>
       {brandLine && (
@@ -18,8 +18,8 @@ export function StageHeader({ eyebrow, title, subtitle, brandLine, compact = fal
           {brandLine}
         </div>
       )}
-      {subtitle && (
-        <div className={`font-cns text-warm-2 mt-2 max-w-[920px] leading-relaxed ${compact ? 'text-[13px]' : 'text-[16px]'}`}>
+      {subtitle && !compact && (
+        <div className="font-cns text-warm-2 mt-2 max-w-[920px] leading-relaxed text-[16px]">
           {subtitle}
         </div>
       )}

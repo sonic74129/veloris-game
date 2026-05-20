@@ -81,6 +81,7 @@ export function StageRightPanel({
       <StoryBackgroundCard
         summary={stage.storyBackgroundShort ?? ''}
         onReplayBrief={onReplayBrief}
+        compact={compact}
       />
 
       {stage.challenge && (

@@ -168,6 +168,18 @@ export function SingleFileVoiceoverPlayer({
     };
   }, [autoPlay, cues, startPlay, storageKey, onEnded, speechBubble]);
 
+  // Speech bubble mode: fire initial speaker event immediately on mount so CharacterLayer
+  // illuminates the right character even before iOS audio unlocks.
+  useEffect(() => {
+    if (!speechBubble || !cues.length) return;
+    const firstSpeaker = cues[0]?.speaker ?? null;
+    if (firstSpeaker) {
+      prevSpeaker.current = firstSpeaker;
+      document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: firstSpeaker } }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // once on mount
+
   // Speech bubble mode: duck BGM while bubble is active (even if audio start is blocked on iOS).
   useEffect(() => {
     if (!speechBubble) return;
@@ -217,6 +229,9 @@ export function SingleFileVoiceoverPlayer({
         <div
           className="frame-corners relative border border-gold-2/60 px-5 py-4"
           style={{ background: 'linear-gradient(180deg,rgba(10,8,6,0.90) 0%,rgba(16,12,9,0.94) 100%)', backdropFilter: 'blur(14px)' }}
+          onClick={status === 'blocked' || status === 'idle' ? () => { replay(); } : undefined}
+          role={status === 'blocked' || status === 'idle' ? 'button' : undefined}
+          aria-label={status === 'blocked' || status === 'idle' ? 'Tap to play voice' : undefined}
         >
           <span className="c-tl" /><span className="c-br" />
 
