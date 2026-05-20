@@ -12,6 +12,9 @@ export function RotatePrompt() {
         Frontier Firm Transformation Trial 采用 16:9 银幕级布局，
         请旋转设备以获得最佳沉浸体验。
       </div>
+      <div className="font-cns text-[12px] text-warm-2 mt-4 max-w-[280px] leading-relaxed border border-gold-2/40 rounded px-4 py-2.5 bg-ink-2/60">
+        💻 建议使用电脑体验完整版，画面更大、操作更顺畅。
+      </div>
       <div className="font-mono text-[10px] tracking-[0.32em] text-gold-3 mt-8">
         PLEASE ROTATE · LANDSCAPE MODE
       </div>

@@ -87,6 +87,7 @@ export function LevelMap() {
       </div>
 
       {/* Stats */}
+      {!isMobile && (
       <div className="absolute right-[60px] top-[260px] w-[260px] flex flex-col gap-3 z-[6]">
         <div className="glass p-4 frame-corners relative">
           <span className="c-tl" /><span className="c-br" />
@@ -113,18 +114,19 @@ export function LevelMap() {
           <div className="font-cns text-[12px] text-gold-4">高阶影响力 +10</div>
         </div>
       </div>
+      )}
 
       {/* Speech bubble — voiceover (delayed 2s on first visit) */}
       {language === 'zh' && voiceoverReady && (
-        <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
+        <div className="absolute z-[7]" style={{ left: 60, top: isMobile ? 200 : 295, width: isMobile ? 400 : 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay={isFirstVisit} />
         </div>
       )}
 
       {/* Stage nodes */}
-      <div className={`absolute z-[6] ${
+      <div className={`absolute z-[6] overflow-y-auto ${
         isMobile
-          ? 'left-[30px] right-[30px] bottom-[75px]'
+          ? 'left-[30px] right-[30px] top-[280px] bottom-[75px]'
           : 'left-[60px] right-[60px] bottom-[110px]'
       }`}>
         <div className={`grid gap-4 relative ${isMobile ? 'grid-cols-5' : 'grid-cols-5'}`}>
