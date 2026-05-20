@@ -17,12 +17,12 @@ function calcCanvasInfo(): CanvasInfo {
   const vv = typeof window !== 'undefined' ? window.visualViewport : null;
   const w = vv ? vv.width * vv.scale : (typeof window !== 'undefined' ? window.innerWidth : 1920);
   const h = vv ? vv.height * vv.scale : (typeof window !== 'undefined' ? window.innerHeight : 1080);
-  const isMobileLandscape = w > h && h < 560;
-  // Also detect touch landscape even with slightly taller viewports (tablets excluded by 768 cap)
-  const isMobileFallback = w > h && h < 768 && 'ontouchstart' in (typeof window !== 'undefined' ? window : {}) && h < 560;
+  // Touch device in landscape with limited height = mobile/tablet landscape.
+  const hasTouch = typeof window !== 'undefined' && ('ontouchstart' in window || (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 0);
+  const isMobileLandscape = w > h && (h < 720 && hasTouch || h < 560);
   // Always letterbox: fit both dimensions.
   const scale = Math.min(w / BASE_W, h / BASE_H);
-  return { scale, isMobileLandscape: isMobileLandscape || isMobileFallback };
+  return { scale, isMobileLandscape };
 }
 
 export function useCanvasScale(): CanvasInfo {
