@@ -1,11 +1,8 @@
 import { zhPack } from './stages.zh';
-import type { Language, LanguagePack } from './types';
+import { enPack } from './stages.en';
+import type { Language } from './types';
 
-// English pack ships as stub; MVP uses zh.
-// To enable EN: replicate zhPack with translated text.
-const enPack: LanguagePack = zhPack;
-
-export const packs: Record<Language, LanguagePack> = {
+export const packs: Record<Language, typeof zhPack> = {
   zh: zhPack,
   en: enPack,
 };

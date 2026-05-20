@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CharacterLayer } from '../character/CharacterLayer';
 import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
-import { MAP_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
+import { MAP_VOICEOVER_ZH, MAP_VOICEOVER_EN } from '../../data/voiceovers/scene0';
 import { Scene2CinematicIntro, type CinematicPhase } from './Scene2CinematicIntro';
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
@@ -124,7 +124,7 @@ export function LevelMap() {
         style={{ left: 60, top: 295, width: 560, opacity: voiceoverReady ? 1 : 0, transition: 'opacity 0.4s ease', pointerEvents: voiceoverReady ? 'auto' : 'none' }}
       >
         <SingleFileVoiceoverPlayer
-          voiceover={MAP_VOICEOVER_ZH}
+          voiceover={language === 'zh' ? MAP_VOICEOVER_ZH : MAP_VOICEOVER_EN}
           speechBubble
           forcePlay
           autoPlay={voiceoverReady}

@@ -22,6 +22,22 @@ export const MAP_VOICEOVER_ZH: SingleFileVoiceover = {
   ],
 };
 
+// English subtitles for the same map audio (voice stays Chinese)
+export const MAP_VOICEOVER_EN: SingleFileVoiceover = {
+  src: 'audio/kinky-lily-map-zh.mp3',
+  storageKey: 'veloris:vo:map:played',
+  cues: [
+    { start: 0.19,  end: 4.79,  text: "Hey, don't let Miranda intimidate you. She just likes to open with boardroom energy.", speaker: 'kinky' },
+    { start: 5.76,  end: 10.04, text: "Relax, CTO. You're not doing this alone.", emphasis: true, speaker: 'lily' },
+    { start: 10.94, end: 14.57, text: "We'll help you connect AI to real business systems — but carefully, not recklessly.", speaker: 'kinky' },
+    { start: 15.41, end: 22.06, text: 'Exactly. Fast and secure. Agents, data, workflows, permissions — none of them can run loose.', emphasis: true, speaker: 'lily' },
+    { start: 22.97, end: 28.19, text: "From here on, we represent Microsoft — helping you build an AI Frontier Firm step by step.", speaker: 'kinky' },
+    { start: 29.07, end: 33.59, text: "Don't worry. Make the right choices and this company will level up.", emphasis: true, speaker: 'lily' },
+    { start: 34.46, end: 36.58, text: 'So, CTO — are you ready?', speaker: 'kinky' },
+    { start: 37.43, end: 38.81, text: "Stage one. Let's go.", emphasis: true, speaker: 'lily' },
+  ],
+};
+
 // ── Chinese voiceover — miranda-scene0-zh.mp3 (~31s) ─────────────────────────
 // Cue timings are estimates from the SSML break structure; fine-tune if off.
 export const SCENE0_VOICEOVER_ZH: SingleFileVoiceover = {
@@ -38,6 +54,23 @@ export const SCENE0_VOICEOVER_ZH: SingleFileVoiceover = {
     { start: 21.44, end: 26.63, text: '你是来判断：哪些系统可以连接，哪些流程必须保护，哪些 Agent 必须被治理。' },
     { start: 27.61, end: 28.64, text: '现在，CTO。' },
     { start: 29.50, end: 30.90, text: '证明你配得上这个位置。', emphasis: true },
+  ],
+};
+
+// English subtitles for the same Miranda audio (voice stays Chinese)
+export const SCENE0_VOICEOVER_EN: SingleFileVoiceover = {
+  src: 'audio/miranda-scene0-zh.mp3',
+  storageKey: 'veloris:vo:mission:played',
+  cues: [
+    { start: 0.15, end: 1.85, text: 'So. You finally arrived, CTO.' },
+    { start: 2.78, end: 7.48, text: 'The board wants speed, every unit wants an Agent, and every team wants to connect AI to their systems:' },
+    { start: 8.10, end: 12.28, text: 'customer profiles, order data, design assets, supply chain workflows, financial permissions.' },
+    { start: 13.24, end: 14.44, text: 'Sounds wonderful, does it not?' },
+    { start: 15.27, end: 17.91, text: "But without boundaries, this isn't the future — it's chaos." },
+    { start: 18.85, end: 20.57, text: "So today, you are not here to demo anything." },
+    { start: 21.44, end: 26.63, text: 'You are here to decide: which systems may connect, which processes must be protected, which Agents must be governed.' },
+    { start: 27.61, end: 28.64, text: 'Now, CTO.' },
+    { start: 29.50, end: 30.90, text: 'Prove you deserve this seat.', emphasis: true },
   ],
 };
 

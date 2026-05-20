@@ -7,7 +7,7 @@ import { StageHeader } from '../layout/StageHeader';
 import { VoiceoverPlayer } from '../voiceover/VoiceoverPlayer';
 import { SingleFileVoiceoverPlayer } from '../voiceover/SingleFileVoiceoverPlayer';
 import { SCENE0_SCRIPT } from '../../content/voiceovers/scene0Miranda';
-import { SCENE0_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
+import { SCENE0_VOICEOVER_ZH, SCENE0_VOICEOVER_EN } from '../../data/voiceovers/scene0';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
@@ -93,6 +93,15 @@ export function MissionBriefing({ stage }: Props) {
         <div className="absolute z-[7]" style={{ left: 50, bottom: 115, width: 460 }}>
           <SingleFileVoiceoverPlayer
             voiceover={SCENE0_VOICEOVER_ZH}
+            speechBubble
+            defaultSpeaker="MIRANDA"
+          />
+        </div>
+      )}
+      {language !== 'zh' && (
+        <div className="absolute z-[7]" style={{ left: 50, bottom: 115, width: 460 }}>
+          <SingleFileVoiceoverPlayer
+            voiceover={SCENE0_VOICEOVER_EN}
             speechBubble
             defaultSpeaker="MIRANDA"
           />
