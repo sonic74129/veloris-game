@@ -153,7 +153,6 @@ export function SingleFileVoiceoverPlayer({
 
     // If media is already buffered before listeners attach, trigger once immediately.
     if (el.readyState >= 3) handleCanPlay();
-
     return () => {
       el.removeEventListener('canplay',    handleCanPlay);
       el.removeEventListener('timeupdate', handleTimeUpdate);
@@ -179,6 +178,18 @@ export function SingleFileVoiceoverPlayer({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // once on mount
+
+  // If autoPlay flips from false → true after mount (e.g. parent waits for a cinematic
+  // to finish), trigger playback now. handleCanPlay only fires once on initial load.
+  useEffect(() => {
+    if (!autoPlay || didInit.current) return;
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.readyState >= 3) {
+      didInit.current = true;
+      if (forcePlay || localStorage.getItem(storageKey) !== '1') startPlay();
+    }
+  }, [autoPlay, forcePlay, startPlay, storageKey]);
 
   // Speech bubble mode: duck BGM only while audio is actually playing.
   // (Status starts as 'idle' before user gesture unlocks iOS audio; ducking on idle

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useMobile } from '../../lib/mobile';
 const BASE = import.meta.env.BASE_URL;
 
 /**
@@ -20,6 +21,7 @@ export function CharacterLayer({
   variant = 'left',
   lead = 'miranda',
 }: CharacterLayerProps) {
+  const isMobile = useMobile();
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
   const [advisorsFadedIn, setAdvisorsFadedIn] = useState(false);
   useEffect(() => {
@@ -41,7 +43,9 @@ export function CharacterLayer({
       : variant === 'left-large'
       ? { left: 40, top: 110, width: 460, height: 820 }
       : variant === 'side'
-      ? { left: 30, top: 120, width: 280, height: 600 }
+      ? (isMobile
+          ? { left: 8, top: 70, width: 200, height: 420 }
+          : { left: 30, top: 120, width: 280, height: 600 })
       : { left: 50, top: 120, width: 360, height: 700 };
 
   // For non-Miranda leads, use height + auto width so aspect ratio stays correct

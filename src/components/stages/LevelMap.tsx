@@ -117,12 +117,19 @@ export function LevelMap() {
         </div>
       </div>
 
-      {/* Speech bubble — show regardless of language to avoid missing dialogue on mobile state drift */}
-      {voiceoverReady && (
-        <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
-          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay />
-        </div>
-      )}
+      {/* Speech bubble — mounted from the start so the <audio> element exists within
+          the original click gesture window (iOS unlock); becomes visible + plays once ready. */}
+      <div
+        className="absolute z-[7]"
+        style={{ left: 60, top: 295, width: 560, opacity: voiceoverReady ? 1 : 0, transition: 'opacity 0.4s ease', pointerEvents: voiceoverReady ? 'auto' : 'none' }}
+      >
+        <SingleFileVoiceoverPlayer
+          voiceover={MAP_VOICEOVER_ZH}
+          speechBubble
+          forcePlay
+          autoPlay={voiceoverReady}
+        />
+      </div>
 
       {/* Stage nodes */}
       <div className="absolute z-[6] overflow-y-auto left-[60px] right-[60px] bottom-[110px]">

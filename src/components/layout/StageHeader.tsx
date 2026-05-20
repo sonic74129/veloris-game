@@ -10,11 +10,11 @@ export function StageHeader({ eyebrow, title, subtitle, brandLine, compact = fal
   return (
     <div className="flex flex-col gap-1">
       <div className="eyebrow">{eyebrow}</div>
-      <div className={`font-cn tracking-[0.08em] text-warm-1 leading-tight ${compact ? 'text-[20px]' : 'text-[44px]'}`}>
+      <div className={`font-cn tracking-[0.08em] text-warm-1 leading-tight ${compact ? 'text-[16px]' : 'text-[44px]'}`}>
         {title}
       </div>
       {brandLine && (
-        <div className={`font-brand tracking-[0.36em] text-gold-3 mt-2 ${compact ? 'text-[11px]' : 'text-[13px]'}`}>
+        <div className={`font-brand tracking-[0.36em] text-gold-3 mt-1 ${compact ? 'text-[9px]' : 'text-[13px]'}`}>
           {brandLine}
         </div>
       )}

@@ -105,7 +105,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
         lead={advisor}
       />
 
-      <div className={`absolute flex ${isMobile ? 'gap-4 top-[86px] left-[250px] right-[28px] bottom-[78px]' : 'gap-6 top-[100px] left-[370px] right-[60px] bottom-[90px]'}`}>
+      <div className={`absolute flex ${isMobile ? 'gap-3 top-[58px] left-[200px] right-[20px] bottom-[52px]' : 'gap-6 top-[100px] left-[370px] right-[60px] bottom-[90px]'}`}>
         {/* Center column: header + slots + options */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex items-start justify-between gap-3">
