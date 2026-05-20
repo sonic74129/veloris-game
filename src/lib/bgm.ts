@@ -113,38 +113,19 @@ export function initBgm(
   document.addEventListener('touchend',  gestureHandler, { capture: true });
   document.addEventListener('touchstart', unlockAudio, { once: true, capture: true });
 
-  // iOS Safari treats HTMLAudioElement.volume as read-only, so fade() never
-  // changes the actual output volume. On iOS we pause/resume BGM instead.
+  // iOS Safari treats HTMLAudioElement.volume as read-only — fade() has no audible
+  // effect there. Rather than pausing BGM (jarring), we simply skip ducking on iOS.
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
-
-  let _pausedByDuck = false;
 
   // Reference-counted ducking so concurrent VO dispatches don't double-duck or prematurely restore.
   const onVoStart = () => {
     _duckCount++;
-    if (_duckCount !== 1) return;
-    if (isIOS) {
-      const a2 = audio();
-      if (_started && !a2.paused) {
-        _pausedByDuck = true;
-        a2.pause();
-      }
-    } else {
-      fade(BGM_DUCKED);
-    }
+    if (_duckCount === 1 && !isIOS) fade(BGM_DUCKED);
   };
   const onVoEnd = () => {
     _duckCount = Math.max(0, _duckCount - 1);
-    if (_duckCount !== 0) return;
-    if (isIOS) {
-      if (_pausedByDuck) {
-        _pausedByDuck = false;
-        audio().play().catch(() => { /* will retry on next gesture */ });
-      }
-    } else {
-      fade(BGM_FULL);
-    }
+    if (_duckCount === 0 && !isIOS) fade(BGM_FULL);
   };
   document.addEventListener('veloris:vo:start', onVoStart);
   document.addEventListener('veloris:vo:end',   onVoEnd);

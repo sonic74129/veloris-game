@@ -180,11 +180,13 @@ export function SingleFileVoiceoverPlayer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // once on mount
 
-  // Speech bubble mode: duck BGM while bubble is active (even if audio start is blocked on iOS).
+  // Speech bubble mode: duck BGM only while audio is actually playing.
+  // (Status starts as 'idle' before user gesture unlocks iOS audio; ducking on idle
+  // would pause BGM for the entire intro silence.)
   useEffect(() => {
     if (!speechBubble) return;
 
-    const shouldDuck = status !== 'ended' && status !== 'fallback';
+    const shouldDuck = status === 'playing';
 
     if (shouldDuck && !voDucked.current) {
       document.dispatchEvent(new CustomEvent('veloris:vo:start'));
