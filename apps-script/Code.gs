@@ -38,16 +38,20 @@ function getSheet() {
 }
 
 // GET ?action=reset → clear and re-seed the sheet
+// GET ?action=clear → clear sheet with NO seed entries
 function doGet(e) {
-  if (e && e.parameter && e.parameter.action === 'reset') {
+  if (e && e.parameter && (e.parameter.action === 'reset' || e.parameter.action === 'clear')) {
+    const wantSeed = e.parameter.action === 'reset';
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(SHEET_NAME);
     if (sheet) ss.deleteSheet(sheet);
     sheet = ss.insertSheet(SHEET_NAME);
     sheet.getRange(1, 1, 1, 7).setValues([['playerName', 'company', 'totalScore', 'totalTime', 'totalWrongAttempts', 'totalHintsUsed', 'timestamp']]);
-    sheet.getRange(2, 1, SEED_DATA.length, 7).setValues(SEED_DATA);
+    if (wantSeed) {
+      sheet.getRange(2, 1, SEED_DATA.length, 7).setValues(SEED_DATA);
+    }
     return ContentService
-      .createTextOutput(JSON.stringify({ ok: true, message: 'Sheet reset with new seed data' }))
+      .createTextOutput(JSON.stringify({ ok: true, message: wantSeed ? 'Sheet reset with seed data' : 'Sheet cleared (no seed)' }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 
