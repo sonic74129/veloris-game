@@ -1,6 +1,7 @@
 export function RotatePrompt() {
   return (
-    <div className="w-screen h-screen bg-ink-0 text-warm-1 flex flex-col items-center justify-center p-8 text-center">
+    <div className="w-screen bg-ink-0 text-warm-1 flex flex-col items-center justify-center p-8 text-center"
+         style={{ height: '100dvh' }}>
       <div className="font-brand text-[11px] tracking-[0.42em] text-gold-3 mb-6">
         CONTOSO MAISON
       </div>

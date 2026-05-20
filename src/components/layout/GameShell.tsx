@@ -66,7 +66,8 @@ export function GameShell({ background, character, children, hideHud = false }: 
   /* All devices: unified letterbox */
   return (
     <MobileContext.Provider value={isMobileLandscape}>
-      <div className="w-screen h-screen flex items-center justify-center bg-black overflow-hidden touch-manipulation">
+      <div className="w-screen flex items-center justify-center bg-black overflow-hidden touch-manipulation"
+           style={{ height: '100dvh' }}>
         <div className="canvas-1920 origin-center" style={{ transform: `scale(${scale})` }}>
           {canvasContent}
         </div>
