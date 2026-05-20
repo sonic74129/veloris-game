@@ -103,13 +103,25 @@ export async function saveLeaderboardEntry(
     // Reload from API to get fresh ranked list
     const remote = await fetchFromApi();
     if (remote) {
-      // Mark the player's latest entry as "you"
-      const ranked = assignRanks(remote);
-      const youIdx = ranked.findIndex(
-        (e) => e.playerName === entry.playerName && e.company === entry.company,
-      );
-      if (youIdx >= 0) ranked[youIdx] = { ...ranked[youIdx], isYou: true };
-      // Also cache locally
+      const newEntry: LeaderboardEntry = { ...entry, timestamp: Date.now(), isYou: true };
+      // Apps Script write may not be visible yet (eventual consistency).
+      // Find any existing entry matching this player; if found pick the best score, else inject.
+      const norm = (s: string) => s.trim().toLowerCase();
+      const matches = remote
+        .map((e, i) => ({ e, i }))
+        .filter(({ e }) => norm(e.playerName) === norm(entry.playerName) && norm(e.company) === norm(entry.company));
+      let merged: LeaderboardEntry[];
+      if (matches.length === 0) {
+        merged = [...remote, newEntry];
+      } else {
+        // Keep all server matches but mark the best as "you"; also ensure our just-submitted score is reflected
+        const best = matches.reduce((a, b) => (b.e.totalScore > a.e.totalScore ? b : a));
+        const useLocal = entry.totalScore > best.e.totalScore;
+        merged = remote.map((e, i) =>
+          i === best.i ? (useLocal ? newEntry : { ...e, isYou: true }) : e,
+        );
+      }
+      const ranked = assignRanks(sortEntries(merged));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ranked));
       return ranked;
     }
