@@ -1,6 +1,9 @@
 /**
  * BGM singleton — shared between App (auto-start) and BottomNav (toggle button).
  * Using a module-level object so there's exactly one Audio element.
+ *
+ * iOS Safari treats HTMLAudioElement.volume as read-only, so we route BGM through
+ * a WebAudio GainNode (the only way to actually duck volume on iOS).
  */
 
 const BGM_MUTED_KEY = 'veloris:bgm:muted';
@@ -12,36 +15,69 @@ const FADE_MS = 400;
 let _audio: HTMLAudioElement | null = null;
 let _started = false;
 let _onStateChange: ((playing: boolean) => void) | null = null;
-let _fadeId: ReturnType<typeof setInterval> | null = null;
 let _duckCount = 0;
+
+// WebAudio graph: audio element → MediaElementSource → GainNode → destination
+let _ctx: AudioContext | null = null;
+let _gain: GainNode | null = null;
+let _sourceNode: MediaElementAudioSourceNode | null = null;
 
 function audio(): HTMLAudioElement {
   if (!_audio) {
     _audio = new Audio();
     _audio.loop = true;
-    _audio.volume = BGM_FULL;
+    _audio.volume = 1; // gain controlled via WebAudio; element volume kept at 1
     _audio.preload = 'auto';
+    _audio.crossOrigin = 'anonymous';
   }
   return _audio;
 }
 
+function getCtx(): AudioContext | null {
+  if (_ctx) return _ctx;
+  try {
+    const Ctx = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return null;
+    _ctx = new Ctx();
+  } catch { return null; }
+  return _ctx;
+}
+
+// Connect BGM audio element through gain node. Idempotent.
+function connectGraph() {
+  const ctx = getCtx();
+  if (!ctx || _sourceNode) return;
+  try {
+    const a = audio();
+    _sourceNode = ctx.createMediaElementSource(a);
+    _gain = ctx.createGain();
+    _gain.gain.value = BGM_FULL;
+    _sourceNode.connect(_gain);
+    _gain.connect(ctx.destination);
+  } catch {
+    // If element was already connected (e.g. HMR), clean refs so element still plays via default route
+    _sourceNode = null;
+    _gain = null;
+  }
+}
+
 // iOS Safari requires AudioContext to be created/resumed inside a user gesture handler.
-// Unlock once on the first user interaction so subsequent HTMLAudioElement plays succeed.
 let _audioUnlocked = false;
 function unlockAudio() {
   if (_audioUnlocked) return;
   _audioUnlocked = true;
+  const ctx = getCtx();
+  if (!ctx) return;
   try {
-    const Ctx = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
-      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
+    // Play a 1-sample silent buffer to fully unlock on iOS
     const buffer = ctx.createBuffer(1, 1, 22050);
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(ctx.destination);
     src.start(0);
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    connectGraph();
   } catch { /* noop */ }
 }
 
@@ -50,18 +86,17 @@ export function ensureAudioUnlocked() {
 }
 
 export function fade(target: number, ms = FADE_MS) {
-  // Cancel any in-progress fade to prevent competing intervals
-  if (_fadeId !== null) { clearInterval(_fadeId); _fadeId = null; }
+  const ctx = getCtx();
+  if (_gain && ctx) {
+    const now = ctx.currentTime;
+    _gain.gain.cancelScheduledValues(now);
+    _gain.gain.setValueAtTime(_gain.gain.value, now);
+    _gain.gain.linearRampToValueAtTime(target, now + ms / 1000);
+    return;
+  }
+  // Fallback (no WebAudio): set element volume directly
   const a = audio();
-  const start = a.volume;
-  const steps = 30;
-  const delta = (target - start) / steps;
-  let i = 0;
-  _fadeId = setInterval(() => {
-    i++;
-    a.volume = Math.min(1, Math.max(0, start + delta * i));
-    if (i >= steps) { clearInterval(_fadeId!); _fadeId = null; }
-  }, ms / steps);
+  a.volume = Math.min(1, Math.max(0, target));
 }
 
 /** Call once at App mount — registers first-interaction auto-start. */
@@ -113,19 +148,15 @@ export function initBgm(
   document.addEventListener('touchend',  gestureHandler, { capture: true });
   document.addEventListener('touchstart', unlockAudio, { once: true, capture: true });
 
-  // iOS Safari treats HTMLAudioElement.volume as read-only — fade() has no audible
-  // effect there. Rather than pausing BGM (jarring), we simply skip ducking on iOS.
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
-
   // Reference-counted ducking so concurrent VO dispatches don't double-duck or prematurely restore.
+  // Works on iOS too because BGM is routed through a WebAudio GainNode.
   const onVoStart = () => {
     _duckCount++;
-    if (_duckCount === 1 && !isIOS) fade(BGM_DUCKED);
+    if (_duckCount === 1) fade(BGM_DUCKED);
   };
   const onVoEnd = () => {
     _duckCount = Math.max(0, _duckCount - 1);
-    if (_duckCount === 0 && !isIOS) fade(BGM_FULL);
+    if (_duckCount === 0) fade(BGM_FULL);
   };
   document.addEventListener('veloris:vo:start', onVoStart);
   document.addEventListener('veloris:vo:end',   onVoEnd);
