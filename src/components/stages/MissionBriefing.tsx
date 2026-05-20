@@ -11,7 +11,6 @@ import { SCENE0_VOICEOVER_ZH } from '../../data/voiceovers/scene0';
 import type { StageConfig } from '../../data/types';
 import { useGameState } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { useMobile } from '../../lib/mobile';
 
 // Switch voice variant via VITE_MIRANDA_VOICE=ava|serena|nova|emma in .env.local
 const VOICE_VARIANT = (import.meta.env.VITE_MIRANDA_VOICE as string) ?? 'ava';
@@ -22,7 +21,6 @@ export function MissionBriefing({ stage }: Props) {
   const language = useGameState((s) => s.language);
   const goToStage = useGameState((s) => s.goToStage);
   const ui = packs[language].ui;
-  const isMobile = useMobile();
 
   // Ensure BGM is restored to full volume on unmount in case a VO was still active
   useEffect(() => {
@@ -31,13 +29,9 @@ export function MissionBriefing({ stage }: Props) {
 
   return (
     <>
-      {!isMobile && <CharacterLayer variant="left-large" />}
+      <CharacterLayer variant="left-large" />
 
-      <div className={`absolute flex gap-8 ${
-        isMobile
-          ? 'top-[55px] left-[20px] right-[20px] bottom-[75px] flex-col'
-          : 'top-[110px] left-[540px] right-[60px] bottom-[100px]'
-      }`}>
+      <div className="absolute flex gap-8 top-[110px] left-[540px] right-[60px] bottom-[100px]">
         {/* Center: header + challenge */}
         <div className="flex-1 flex flex-col gap-5 overflow-y-auto">
           <StageHeader

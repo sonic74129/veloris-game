@@ -7,7 +7,6 @@ import { Scene2CinematicIntro, type CinematicPhase } from './Scene2CinematicIntr
 import type { StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { useMobile } from '../../lib/mobile';
 
 const MAP_NODES: { id: StageId; title: string; subtitle: string }[] = [
   { id: 'stage1', title: 'Agent-Ready Application', subtitle: '现代化关键 Java / .NET 应用，让 Agent 可安全接入' },
@@ -27,7 +26,6 @@ export function LevelMap() {
   const stage = pack.stages.find((s) => s.id === 'map')!;
   const ui = pack.ui;
 
-  const isMobile = useMobile();
   const progress = Math.round((completed.filter((c) => c.startsWith('stage')).length / 5) * 100);
   const nextStage = STAGE_ORDER.find((id) => id.startsWith('stage') && !completed.includes(id)) ?? 'stage1';
 
@@ -65,17 +63,13 @@ export function LevelMap() {
         onComplete={handleCinematicComplete}
       />
 
-      {/* Static characters — fade in when video ends; hidden on mobile to free up space */}
-      {!isMobile && (
-        <div style={{ opacity: showCharacters ? 1 : 0, transition: 'opacity 0.6s ease' }}>
-          <CharacterLayer miranda={false} advisors="large" />
-        </div>
-      )}
+      {/* Static characters — fade in when video ends */}
+      <div style={{ opacity: showCharacters ? 1 : 0, transition: 'opacity 0.6s ease' }}>
+        <CharacterLayer miranda={false} advisors="large" />
+      </div>
 
       {/* Header */}
-      <div className={`absolute right-[40px] z-[6] ${
-        isMobile ? 'top-[55px] left-[40px]' : 'top-[100px] left-[60px]'
-      }`}>
+      <div className="absolute right-[40px] z-[6] top-[100px] left-[60px]">
         <div className="eyebrow">SCENE · 02 · MICROSOFT ADVISORY</div>
         <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
           {stage.title}
@@ -89,7 +83,6 @@ export function LevelMap() {
       </div>
 
       {/* Stats */}
-      {!isMobile && (
       <div className="absolute right-[60px] top-[260px] w-[260px] flex flex-col gap-3 z-[6]">
         <div className="glass p-4 frame-corners relative">
           <span className="c-tl" /><span className="c-br" />
@@ -116,22 +109,17 @@ export function LevelMap() {
           <div className="font-cns text-[12px] text-gold-4">高阶影响力 +10</div>
         </div>
       </div>
-      )}
 
       {/* Speech bubble — voiceover (delayed 2s on first visit) */}
       {language === 'zh' && voiceoverReady && (
-        <div className="absolute z-[7]" style={{ left: 60, top: isMobile ? 200 : 295, width: isMobile ? 400 : 560 }}>
+        <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay={isFirstVisit} />
         </div>
       )}
 
       {/* Stage nodes */}
-      <div className={`absolute z-[6] overflow-y-auto ${
-        isMobile
-          ? 'left-[20px] right-[20px] top-[200px] bottom-[75px]'
-          : 'left-[60px] right-[60px] bottom-[110px]'
-      }`}>
-        <div className={`grid gap-3 relative ${isMobile ? 'grid-cols-2' : 'grid-cols-5'}`}>
+      <div className="absolute z-[6] overflow-y-auto left-[60px] right-[60px] bottom-[110px]">
+        <div className="grid gap-3 relative grid-cols-5">
           <div className="absolute top-[60px] left-[4%] right-[4%] h-px
                           bg-gradient-to-r from-transparent via-gold-2 to-transparent" />
           {MAP_NODES.map((node, idx) => {

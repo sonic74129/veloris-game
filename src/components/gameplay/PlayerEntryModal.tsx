@@ -122,6 +122,12 @@ export function PlayerEntryModal() {
               Your name will appear inside the challenge.<br />
               <span className="text-warm-2">Miranda will remember your decisions.</span>
             </div>
+
+            {/* Zoom warning */}
+            <div className="font-cns text-[11px] text-accent-red/90 text-center mt-4 leading-relaxed border border-accent-red/30 rounded px-3 py-2 bg-ink-2/50">
+              ⚠️ 请勿双指缩放屏幕 / Please don't pinch-zoom<br />
+              缩放可能导致画面错位，刷新页面可恢复。
+            </div>
           </motion.div>
         </motion.div>
       )}

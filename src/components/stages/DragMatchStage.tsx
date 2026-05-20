@@ -8,7 +8,6 @@ import { StageRightPanel } from './StageRightPanel';
 import type { StageConfig, StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER, PUZZLE_STAGES } from '../../hooks/useGameState';
 import { packs } from '../../data';
-import { useMobile } from '../../lib/mobile';
 import type { StageScore } from '../../lib/scoring';
 
 interface Props { stage: StageConfig; slotsLayout?: 'horizontal' | 'vertical' }
@@ -39,7 +38,6 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
   const markStoryBriefViewed = useGameState((s) => s.markStoryBriefViewed);
   const ui = packs[language].ui;
 
-  const isMobile = useMobile();
   const [showOverlay, setShowOverlay] = useState(false);
   const [lastScore, setLastScore] = useState<StageScore | null>(null);
   const [showOptionDescriptions, setShowOptionDescriptions] = useState(false);
@@ -100,18 +98,12 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
 
   return (
     <>
-      {!isMobile && (
-        <CharacterLayer
-          variant="side"
-          lead={advisor}
-        />
-      )}
+      <CharacterLayer
+        variant="side"
+        lead={advisor}
+      />
 
-      <div className={`absolute flex gap-6 ${
-        isMobile
-          ? 'top-[55px] left-[20px] right-[20px] bottom-[75px]'
-          : 'top-[100px] left-[370px] right-[60px] bottom-[90px]'
-      }`}>
+      <div className="absolute flex gap-6 top-[100px] left-[370px] right-[60px] bottom-[90px]">
         {/* Center column: header + slots + options */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex items-start justify-between gap-3">
@@ -163,29 +155,15 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           </div>
         </div>
 
-        {/* On mobile, hide the right panel and show a floating button instead */}
-        {isMobile ? (
-          <button
-            onClick={() => openStoryBriefOverlay(stage.id)}
-            className="absolute top-0 right-0 z-20 glass frame-corners px-4 py-2
-                       font-mono text-[11px] tracking-[0.15em] text-gold-4
-                       hover:text-gold-3 border border-gold-1/50 hover:border-gold-3
-                       transition-colors"
-            aria-label="查看背景知识"
-          >
-            📖 背景
-          </button>
-        ) : (
-          <StageRightPanel
-            stage={stage}
-            challengeTitle={ui.panels.challenge}
-            missionTitle={ui.panels.mission}
-            advisor={advisor}
-            hintText={knowledgeHint}
-            onRevealHint={() => setShowOptionDescriptions(true)}
-            onReplayBrief={() => openStoryBriefOverlay(stage.id)}
-          />
-        )}
+        <StageRightPanel
+          stage={stage}
+          challengeTitle={ui.panels.challenge}
+          missionTitle={ui.panels.mission}
+          advisor={advisor}
+          hintText={knowledgeHint}
+          onRevealHint={() => setShowOptionDescriptions(true)}
+          onReplayBrief={() => openStoryBriefOverlay(stage.id)}
+        />
       </div>
 
       <StoryBriefOverlay
