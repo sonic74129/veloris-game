@@ -7,6 +7,7 @@
  */
 
 import { useRef, useCallback, useEffect, useState } from 'react';
+import { ensureAudioUnlocked } from '../../lib/bgm';
 
 const BASE_URL = import.meta.env.BASE_URL;
 const VIDEO_SRC = `${BASE_URL}video/scene2-intro.mp4`;
@@ -33,33 +34,42 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const [phase, setPhase] = useState<CinematicPhase>('idle');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
   const earlyCutTriggered = useRef(false);
 
   // Cleanup
   useEffect(() => {
     return () => {
+      cancelAnimationFrame(rafRef.current);
       videoRef.current?.pause();
       audioRef.current?.pause();
     };
   }, []);
 
-  // Use timeupdate instead of RAF — much more reliable on iOS Safari
-  const handleTimeUpdate = useCallback(() => {
-    const v = videoRef.current;
-    if (!v || earlyCutTriggered.current) return;
-    const remaining = durationRef.current - v.currentTime;
+  // RAF loop: handle early cut (fade to black before video end)
+  const startLoop = useCallback(() => {
+    const tick = () => {
+      const v = videoRef.current;
+      if (!v || v.paused) return;
+      const remaining = durationRef.current - v.currentTime;
 
-    if (remaining <= EARLY_CUT_SEC) {
-      earlyCutTriggered.current = true;
-      v.pause();
-      if (audioRef.current) audioRef.current.pause();
-      setPhase('freezing');
-      setTimeout(() => {
-        setPhase('done');
-        onComplete();
-      }, FREEZE_MS);
-    }
+      if (remaining <= EARLY_CUT_SEC && !earlyCutTriggered.current) {
+        earlyCutTriggered.current = true;
+        v.pause();
+        if (audioRef.current) audioRef.current.pause();
+        cancelAnimationFrame(rafRef.current);
+        setPhase('freezing');
+        setTimeout(() => {
+          setPhase('done');
+          onComplete();
+        }, FREEZE_MS);
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
   }, [onComplete]);
 
   // Start playback
@@ -70,6 +80,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
     const startPlayback = async () => {
       setPhase('playing');
+      ensureAudioUnlocked();
 
       // Video always muted — audio via separate <audio> element
       video.muted = true;
@@ -84,31 +95,11 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
       // Play audio SFX (separate element, reliable autoplay)
       if (audioRef.current) {
-        const sfx = audioRef.current;
-        sfx.currentTime = 0;
-        const playSfx = () => { sfx.play().catch(() => {}); };
-        if (sfx.readyState >= 3) {
-          playSfx();
-        } else {
-          sfx.addEventListener('canplay', playSfx, { once: true });
-        }
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
       }
 
-      // Safety timeout: if neither timeupdate nor onEnded fires, force completion
-      const safetyMs = (durationRef.current + 3) * 1000;
-      const safety = setTimeout(() => {
-        if (!earlyCutTriggered.current) {
-          earlyCutTriggered.current = true;
-          video.pause();
-          audioRef.current?.pause();
-          setPhase('done');
-          onComplete();
-        }
-      }, safetyMs);
-      // Store for cleanup
-      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current?.addEventListener(
-        'ended', () => clearTimeout(safety), { once: true }
-      );
+      startLoop();
     };
 
     if (video.readyState >= 3) {
@@ -133,7 +124,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         video.removeEventListener('canplay', onCanPlay);
       };
     }
-  }, [trigger, phase, onComplete]);
+  }, [trigger, phase, onComplete, startLoop]);
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) durationRef.current = videoRef.current.duration;
@@ -141,7 +132,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
   const handleError = useCallback(() => {
     if (phase !== 'done') {
-      earlyCutTriggered.current = true;
+      cancelAnimationFrame(rafRef.current);
       audioRef.current?.pause();
       setPhase('done');
       onComplete();
@@ -149,8 +140,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   }, [phase, onComplete]);
 
   const handleEnded = useCallback(() => {
-    if (earlyCutTriggered.current) return; // already handled by timeupdate
-    earlyCutTriggered.current = true;
+    cancelAnimationFrame(rafRef.current);
     audioRef.current?.pause();
     setPhase('freezing');
     setTimeout(() => {
@@ -172,7 +162,6 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         preload="auto"
         playsInline
         onLoadedMetadata={handleLoadedMetadata}
-        onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onError={handleError}
         className="pointer-events-none"

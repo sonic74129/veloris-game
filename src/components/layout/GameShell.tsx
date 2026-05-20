@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useCanvasScale } from '../../lib/scale';
-import { MobileContext } from '../../lib/mobile';
+import { MobileContext, CanvasScaleContext } from '../../lib/mobile';
 import { TopStatusBar } from './TopStatusBar';
 import { BottomNav } from './BottomNav';
 import { RotatePrompt } from './RotatePrompt';
@@ -66,12 +66,14 @@ export function GameShell({ background, character, children, hideHud = false }: 
   /* All devices: unified letterbox */
   return (
     <MobileContext.Provider value={isMobileLandscape}>
-      <div className="w-screen flex items-center justify-center bg-black overflow-hidden touch-manipulation"
-           style={{ height: '100dvh' }}>
-        <div className="canvas-1920 origin-center" style={{ transform: `scale(${scale})` }}>
-          {canvasContent}
+      <CanvasScaleContext.Provider value={scale}>
+        <div className="w-screen flex items-center justify-center bg-black overflow-hidden touch-manipulation"
+             style={{ height: '100dvh' }}>
+          <div className="canvas-1920 origin-center" style={{ transform: `scale(${scale})` }}>
+            {canvasContent}
+          </div>
         </div>
-      </div>
+      </CanvasScaleContext.Provider>
     </MobileContext.Provider>
   );
 }

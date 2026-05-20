@@ -45,6 +45,10 @@ function unlockAudio() {
   } catch { /* noop */ }
 }
 
+export function ensureAudioUnlocked() {
+  unlockAudio();
+}
+
 export function fade(target: number, ms = FADE_MS) {
   // Cancel any in-progress fade to prevent competing intervals
   if (_fadeId !== null) { clearInterval(_fadeId); _fadeId = null; }

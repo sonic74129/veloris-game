@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 import type { GameOption } from '../../data/types';
 import { accentHex, accentSoft } from '../../lib/accent';
+import { useCanvasScaleValue } from '../../lib/mobile';
 import { Icon } from '../icons/Icon';
 
 interface DragOptionCardProps {
@@ -12,11 +13,20 @@ interface DragOptionCardProps {
 }
 
 export function DragOptionCard({ option, disabled = false, showDescription = false }: DragOptionCardProps) {
+  const scale = useCanvasScaleValue();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: option.id,
     disabled,
     data: { option },
   });
+
+  const adjustedTransform = transform
+    ? {
+        ...transform,
+        x: transform.x / Math.max(scale, 0.01),
+        y: transform.y / Math.max(scale, 0.01),
+      }
+    : null;
 
   const accent = accentHex[option.accent];
   const soft = accentSoft[option.accent];
@@ -26,7 +36,7 @@ export function DragOptionCard({ option, disabled = false, showDescription = fal
   const cardHeightClass = showAssetMeta ? 'min-h-[162px]' : shouldShowDescription ? 'h-[124px]' : 'h-[96px]';
 
   const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Translate.toString(adjustedTransform),
     opacity: isDragging ? 0 : disabled ? 0.35 : 1,
     cursor: disabled ? 'not-allowed' : isDragging ? 'grabbing' : 'grab',
     borderColor: accent,

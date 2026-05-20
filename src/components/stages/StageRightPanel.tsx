@@ -13,6 +13,7 @@ interface StageRightPanelProps {
   hintText: string;
   onRevealHint: () => void;
   onReplayBrief: () => void;
+  compact?: boolean;
 }
 
 export function StageRightPanel({
@@ -23,6 +24,7 @@ export function StageRightPanel({
   hintText,
   onRevealHint,
   onReplayBrief,
+  compact = false,
 }: StageRightPanelProps) {
   const assignments = useGameState((s) => s.slotAssignments);
 
@@ -36,7 +38,7 @@ export function StageRightPanel({
       ];
 
     return (
-      <div className="w-[340px] flex flex-col gap-3 overflow-y-auto pr-1">
+      <div className={`${compact ? 'w-[260px]' : 'w-[340px]'} flex flex-col gap-3 overflow-y-auto pr-1`}>
         <div className="glass frame-corners p-5 relative">
           <span className="c-tl" /><span className="c-br" />
           <div className="eyebrow mb-2">{sidebar?.chairwomanTitle ?? 'CHAIRWOMAN 的挑战'}</div>
@@ -75,7 +77,7 @@ export function StageRightPanel({
   }
 
   return (
-    <div className="w-[340px] flex flex-col gap-3 overflow-y-auto pr-1">
+    <div className={`${compact ? 'w-[260px]' : 'w-[340px]'} flex flex-col gap-3 overflow-y-auto pr-1`}>
       <StoryBackgroundCard
         summary={stage.storyBackgroundShort ?? ''}
         onReplayBrief={onReplayBrief}

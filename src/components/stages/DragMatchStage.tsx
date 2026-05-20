@@ -8,6 +8,7 @@ import { StageRightPanel } from './StageRightPanel';
 import type { StageConfig, StageId } from '../../data/types';
 import { useGameState, STAGE_ORDER, PUZZLE_STAGES } from '../../hooks/useGameState';
 import { packs } from '../../data';
+import { useMobile } from '../../lib/mobile';
 import type { StageScore } from '../../lib/scoring';
 
 interface Props { stage: StageConfig; slotsLayout?: 'horizontal' | 'vertical' }
@@ -21,6 +22,7 @@ const ADVISOR_BY_STAGE: Partial<Record<StageId, 'kinky' | 'lily'>> = {
 };
 
 export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
+  const isMobile = useMobile();
   const language = useGameState((s) => s.language);
   const completeStage = useGameState((s) => s.completeStage);
   const resetStage = useGameState((s) => s.resetStage);
@@ -103,7 +105,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
         lead={advisor}
       />
 
-      <div className="absolute flex gap-6 top-[100px] left-[370px] right-[60px] bottom-[90px]">
+      <div className={`absolute flex ${isMobile ? 'gap-4 top-[86px] left-[250px] right-[28px] bottom-[78px]' : 'gap-6 top-[100px] left-[370px] right-[60px] bottom-[90px]'}`}>
         {/* Center column: header + slots + options */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex items-start justify-between gap-3">
@@ -111,6 +113,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
               eyebrow={`SCENE · 0${stage.stageNumber} · STAGE`}
               title={stage.title}
               subtitle={stage.subtitle}
+              compact={isMobile}
             />
             <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
               {prevStage && (
@@ -163,6 +166,7 @@ export function DragMatchStage({ stage, slotsLayout = 'horizontal' }: Props) {
           hintText={knowledgeHint}
           onRevealHint={() => setShowOptionDescriptions(true)}
           onReplayBrief={() => openStoryBriefOverlay(stage.id)}
+          compact={isMobile}
         />
       </div>
 

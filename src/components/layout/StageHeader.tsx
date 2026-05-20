@@ -3,22 +3,23 @@ interface StageHeaderProps {
   title: string;
   subtitle?: string;
   brandLine?: string;       // English subtitle in gold
+  compact?: boolean;
 }
 
-export function StageHeader({ eyebrow, title, subtitle, brandLine }: StageHeaderProps) {
+export function StageHeader({ eyebrow, title, subtitle, brandLine, compact = false }: StageHeaderProps) {
   return (
     <div className="flex flex-col gap-1">
       <div className="eyebrow">{eyebrow}</div>
-      <div className="font-cn text-[44px] tracking-[0.08em] text-warm-1 leading-tight">
+      <div className={`font-cn tracking-[0.08em] text-warm-1 leading-tight ${compact ? 'text-[30px]' : 'text-[44px]'}`}>
         {title}
       </div>
       {brandLine && (
-        <div className="font-brand text-[13px] tracking-[0.36em] text-gold-3 mt-2">
+        <div className={`font-brand tracking-[0.36em] text-gold-3 mt-2 ${compact ? 'text-[11px]' : 'text-[13px]'}`}>
           {brandLine}
         </div>
       )}
       {subtitle && (
-        <div className="font-cns text-[16px] text-warm-2 mt-2 max-w-[920px] leading-relaxed">
+        <div className={`font-cns text-warm-2 mt-2 max-w-[920px] leading-relaxed ${compact ? 'text-[13px]' : 'text-[16px]'}`}>
           {subtitle}
         </div>
       )}

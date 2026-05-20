@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ensureAudioUnlocked } from '../../lib/bgm';
 
 export interface SubtitleCue {
   start: number;       // audio currentTime (seconds) — cue becomes active
@@ -53,6 +54,7 @@ export function SingleFileVoiceoverPlayer({
   const startPlay = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
+    ensureAudioUnlocked();
     setStatus('playing');
 
     const attemptPlay = () => {
@@ -83,6 +85,7 @@ export function SingleFileVoiceoverPlayer({
   const replay = useCallback(() => {
     const el = audioRef.current;
     if (!el || status === 'fallback') return;
+    ensureAudioUnlocked();
     localStorage.removeItem(storageKey);
     el.currentTime = 0;
     setStatus('playing');
@@ -146,6 +149,9 @@ export function SingleFileVoiceoverPlayer({
     el.addEventListener('timeupdate', handleTimeUpdate);
     el.addEventListener('ended',      handleEnded);
     el.addEventListener('error',      handleError);
+
+    // If media is already buffered before listeners attach, trigger once immediately.
+    if (el.readyState >= 3) handleCanPlay();
 
     return () => {
       el.removeEventListener('canplay',    handleCanPlay);

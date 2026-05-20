@@ -38,16 +38,6 @@ export function LevelMap() {
     setCinematicPhase('done');
   }, []);
 
-  // Nuclear safety net: if cinematic doesn't complete within 12s, force it.
-  // This guarantees characters + dialogue always appear on mobile.
-  useEffect(() => {
-    if (!isFirstVisit || cinematicPhase === 'done') return;
-    const safety = setTimeout(() => {
-      setCinematicPhase('done');
-    }, 12000);
-    return () => clearTimeout(safety);
-  }, [isFirstVisit, cinematicPhase]);
-
   // Voiceover starts after video finishes (cinematicPhase==='done'), with 1s delay
   const [voiceoverReady, setVoiceoverReady] = useState(!isFirstVisit);
   useEffect(() => {
@@ -62,8 +52,15 @@ export function LevelMap() {
     return () => clearTimeout(timer);
   }, [cinematicPhase, isFirstVisit, voiceoverReady]);
 
+  // iOS fallback: if cinematic callback never arrives, still show characters + dialogue.
+  useEffect(() => {
+    if (!isFirstVisit || cinematicPhase === 'done' || voiceoverReady) return;
+    const timer = setTimeout(() => setVoiceoverReady(true), 8000);
+    return () => clearTimeout(timer);
+  }, [isFirstVisit, cinematicPhase, voiceoverReady]);
+
   // Characters hidden while video is visible (playing or freezing)
-  const showCharacters = cinematicPhase === 'done';
+  const showCharacters = cinematicPhase === 'done' || voiceoverReady;
 
   return (
     <>
@@ -120,8 +117,8 @@ export function LevelMap() {
         </div>
       </div>
 
-      {/* Speech bubble — voiceover (delayed 2s on first visit) */}
-      {language === 'zh' && voiceoverReady && (
+      {/* Speech bubble — show regardless of language to avoid missing dialogue on mobile state drift */}
+      {voiceoverReady && (
         <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
           <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay />
         </div>
