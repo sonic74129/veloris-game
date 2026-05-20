@@ -46,6 +46,7 @@ export function SingleFileVoiceoverPlayer({
   const audioRef    = useRef<HTMLAudioElement>(null);
   const didInit     = useRef(false);
   const prevSpeaker = useRef<string | null>(null);
+  const voDucked    = useRef(false);
 
   const [status,     setStatus]     = useState<Status>('idle');
   const [activeCue,  setActiveCue]  = useState<SubtitleCue | null>(null);
@@ -60,13 +61,13 @@ export function SingleFileVoiceoverPlayer({
     const attemptPlay = () => {
       el.play().then(() => {
         // Only duck BGM after play actually succeeds
-        document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+        if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:start'));
       }).catch(() => {
         // iOS: audio not ready — retry once on canplay, then give up
         if (el.readyState < 3) {
           el.addEventListener('canplay', () => {
             el.play().then(() => {
-              document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+              if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:start'));
             }).catch(() => { setStatus('blocked'); });
           }, { once: true });
         } else {
@@ -91,11 +92,11 @@ export function SingleFileVoiceoverPlayer({
     setStatus('playing');
     setActiveCue(null);
     el.play().then(() => {
-      document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+      if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:start'));
     }).catch(() => {
       setStatus('blocked');
     });
-  }, [status, storageKey]);
+  }, [status, speechBubble, storageKey]);
 
   const skip = useCallback(() => {
     const el = audioRef.current;
@@ -105,9 +106,9 @@ export function SingleFileVoiceoverPlayer({
     prevSpeaker.current = null;
     document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
     localStorage.setItem(storageKey, '1');
-    document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+    if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:end'));
     onEnded?.();
-  }, [storageKey, onEnded]);
+  }, [speechBubble, storageKey, onEnded]);
 
   // ── Wire audio element events ─────────────────────────────────────────────
   useEffect(() => {
@@ -137,7 +138,7 @@ export function SingleFileVoiceoverPlayer({
       prevSpeaker.current = null;
       document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
       localStorage.setItem(storageKey, '1');
-      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+      if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:end'));
       onEnded?.();
     };
 
@@ -161,11 +162,34 @@ export function SingleFileVoiceoverPlayer({
       // If unmounted while playing, restore BGM
       if (!el.paused) {
         el.pause();
-        document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+        if (!speechBubble) document.dispatchEvent(new CustomEvent('veloris:vo:end'));
         document.dispatchEvent(new CustomEvent('veloris:vo:speaker', { detail: { who: null } }));
       }
     };
-  }, [autoPlay, cues, startPlay, storageKey, onEnded]);
+  }, [autoPlay, cues, startPlay, storageKey, onEnded, speechBubble]);
+
+  // Speech bubble mode: duck BGM while bubble is active (even if audio start is blocked on iOS).
+  useEffect(() => {
+    if (!speechBubble) return;
+
+    const shouldDuck = status !== 'ended' && status !== 'fallback';
+
+    if (shouldDuck && !voDucked.current) {
+      document.dispatchEvent(new CustomEvent('veloris:vo:start'));
+      voDucked.current = true;
+    }
+    if (!shouldDuck && voDucked.current) {
+      document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+      voDucked.current = false;
+    }
+
+    return () => {
+      if (voDucked.current) {
+        document.dispatchEvent(new CustomEvent('veloris:vo:end'));
+        voDucked.current = false;
+      }
+    };
+  }, [speechBubble, status]);
 
   // If audio failed but we're in speech-bubble mode, still show text (don't hide UI)
   if (status === 'fallback' && !speechBubble) return null;
