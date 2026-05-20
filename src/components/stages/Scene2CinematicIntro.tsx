@@ -33,42 +33,33 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   const [phase, setPhase] = useState<CinematicPhase>('idle');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const rafRef = useRef<number>(0);
   const durationRef = useRef(6);
   const earlyCutTriggered = useRef(false);
 
   // Cleanup
   useEffect(() => {
     return () => {
-      cancelAnimationFrame(rafRef.current);
       videoRef.current?.pause();
       audioRef.current?.pause();
     };
   }, []);
 
-  // RAF loop: handle early cut (fade to black before video end)
-  const startLoop = useCallback(() => {
-    const tick = () => {
-      const v = videoRef.current;
-      if (!v || v.paused) return;
-      const remaining = durationRef.current - v.currentTime;
+  // Use timeupdate instead of RAF — much more reliable on iOS Safari
+  const handleTimeUpdate = useCallback(() => {
+    const v = videoRef.current;
+    if (!v || earlyCutTriggered.current) return;
+    const remaining = durationRef.current - v.currentTime;
 
-      if (remaining <= EARLY_CUT_SEC && !earlyCutTriggered.current) {
-        earlyCutTriggered.current = true;
-        v.pause();
-        if (audioRef.current) audioRef.current.pause();
-        cancelAnimationFrame(rafRef.current);
-        setPhase('freezing');
-        setTimeout(() => {
-          setPhase('done');
-          onComplete();
-        }, FREEZE_MS);
-        return;
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
+    if (remaining <= EARLY_CUT_SEC) {
+      earlyCutTriggered.current = true;
+      v.pause();
+      if (audioRef.current) audioRef.current.pause();
+      setPhase('freezing');
+      setTimeout(() => {
+        setPhase('done');
+        onComplete();
+      }, FREEZE_MS);
+    }
   }, [onComplete]);
 
   // Start playback
@@ -103,7 +94,21 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         }
       }
 
-      startLoop();
+      // Safety timeout: if neither timeupdate nor onEnded fires, force completion
+      const safetyMs = (durationRef.current + 3) * 1000;
+      const safety = setTimeout(() => {
+        if (!earlyCutTriggered.current) {
+          earlyCutTriggered.current = true;
+          video.pause();
+          audioRef.current?.pause();
+          setPhase('done');
+          onComplete();
+        }
+      }, safetyMs);
+      // Store for cleanup
+      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current?.addEventListener(
+        'ended', () => clearTimeout(safety), { once: true }
+      );
     };
 
     if (video.readyState >= 3) {
@@ -128,7 +133,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         video.removeEventListener('canplay', onCanPlay);
       };
     }
-  }, [trigger, phase, onComplete, startLoop]);
+  }, [trigger, phase, onComplete]);
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) durationRef.current = videoRef.current.duration;
@@ -136,7 +141,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
 
   const handleError = useCallback(() => {
     if (phase !== 'done') {
-      cancelAnimationFrame(rafRef.current);
+      earlyCutTriggered.current = true;
       audioRef.current?.pause();
       setPhase('done');
       onComplete();
@@ -144,7 +149,8 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
   }, [phase, onComplete]);
 
   const handleEnded = useCallback(() => {
-    cancelAnimationFrame(rafRef.current);
+    if (earlyCutTriggered.current) return; // already handled by timeupdate
+    earlyCutTriggered.current = true;
     audioRef.current?.pause();
     setPhase('freezing');
     setTimeout(() => {
@@ -166,6 +172,7 @@ export function Scene2CinematicIntro({ trigger, onComplete }: Props) {
         preload="auto"
         playsInline
         onLoadedMetadata={handleLoadedMetadata}
+        onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onError={handleError}
         className="pointer-events-none"
