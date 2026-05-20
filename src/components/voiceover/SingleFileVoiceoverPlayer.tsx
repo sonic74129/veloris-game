@@ -144,7 +144,8 @@ export function SingleFileVoiceoverPlayer({
     };
   }, [autoPlay, cues, startPlay, storageKey, onEnded]);
 
-  if (status === 'fallback') return null;
+  // If audio failed but we're in speech-bubble mode, still show text (don't hide UI)
+  if (status === 'fallback' && !speechBubble) return null;
 
   const isEmphasis = activeCue?.emphasis ?? false;
 

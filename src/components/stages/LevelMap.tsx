@@ -113,7 +113,7 @@ export function LevelMap() {
       {/* Speech bubble — voiceover (delayed 2s on first visit) */}
       {language === 'zh' && voiceoverReady && (
         <div className="absolute z-[7]" style={{ left: 60, top: 295, width: 560 }}>
-          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay={isFirstVisit} />
+          <SingleFileVoiceoverPlayer voiceover={MAP_VOICEOVER_ZH} speechBubble forcePlay />
         </div>
       )}
 
