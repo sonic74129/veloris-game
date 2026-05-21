@@ -76,9 +76,9 @@ export function LevelMap() {
       </div>
 
       {/* Header */}
-      <div className="absolute right-[40px] z-[6] top-[100px] left-[60px]">
+      <div className="absolute z-[6] top-[100px] left-[60px] max-w-[620px]">
         <div className="eyebrow">SCENE · 02 · MICROSOFT ADVISORY</div>
-        <div className="font-cn text-[40px] tracking-[0.1em] text-warm-1 leading-tight mt-1">
+        <div className="font-cn text-[28px] tracking-[0.06em] text-warm-1 leading-tight mt-1">
           {stage.title}
         </div>
         <div className="font-brand text-[12px] tracking-[0.36em] text-gold-3 mt-3">
