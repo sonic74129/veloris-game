@@ -22,7 +22,11 @@ export function LeaderboardScreen() {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.play().catch(() => {});
+    v.play().then(() => {
+      // unmute immediately after autoplay starts (game interaction satisfies browser policy)
+      v.muted = false;
+      setVidMuted(false);
+    }).catch(() => {});
   }, []);
 
   function togglePause() {
@@ -166,7 +170,6 @@ export function LeaderboardScreen() {
           <video
             ref={videoRef}
             src={`${BASE}video/sonic.mp4`}
-            loop
             muted
             playsInline
             style={{
