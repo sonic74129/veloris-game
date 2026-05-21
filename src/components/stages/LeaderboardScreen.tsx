@@ -1,20 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useGameState } from '../../hooks/useGameState';
 import { loadLeaderboard, type LeaderboardEntry } from '../../lib/leaderboard';
 
+const BASE = import.meta.env.BASE_URL;
+
+const SONIC_SUBTITLE: Record<string, string> = {
+  zh: '挑战完成，恭喜！您的智慧与选择，已永久刻入排行榜。',
+  en: 'Challenge complete, congratulations! Your wisdom and choices are now forever engraved in the leaderboard.',
+};
+
 export function LeaderboardScreen() {
   const restartRun = useGameState((s) => s.restartRun);
+  const language = useGameState((s) => s.language);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     loadLeaderboard().then(setBoard);
+  }, []);
+
+  // Auto-play sonic video
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.play().catch(() => {});
   }, []);
 
   const top3 = board.slice(0, 3);
   const allRows = board;
 
   return (
-    <div className="absolute inset-0 overflow-y-auto px-10 pt-16 pb-10">
+    <>
+      <div className="absolute inset-0 overflow-y-auto px-10 pt-16 pb-10">
       {/* Header */}
       <div className="flex justify-between items-end mb-6 max-w-[1400px] mx-auto">
         <div>
@@ -106,6 +123,31 @@ export function LeaderboardScreen() {
         </button>
       </div>
     </div>
+
+    {/* Sonic congratulations widget — bottom-right, canvas-absolute so it floats above the scroll */}
+    <div className="absolute right-[48px] bottom-[100px] z-50 flex flex-col items-end gap-2 w-[200px]">
+      {/* Video with screen blend to dissolve dark background into the UI */}
+      <div className="relative w-[200px] h-[200px] rounded-xl overflow-hidden">
+        <div className="absolute inset-0 bg-ink-0/0 pointer-events-none" />
+        <video
+          ref={videoRef}
+          src={`${BASE}video/sonic.mp4`}
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+          style={{ mixBlendMode: 'screen' }}
+        />
+      </div>
+      {/* Subtitle */}
+      <div className="w-[220px] glass px-3 py-2 rounded-lg text-right">
+        <div className="font-mono text-[8px] tracking-[0.28em] text-gold-3 mb-1">SONIC · FR</div>
+        <div className="font-cns text-[11px] text-warm-2 leading-[1.5]">
+          {SONIC_SUBTITLE[language] ?? SONIC_SUBTITLE.en}
+        </div>
+      </div>
+    </div>
+    </>
   );
 }
 
