@@ -9,6 +9,8 @@
   100% { background-position: -50% center; }
 }
 
+@keyframes greet-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
 /* Voiceover subtitle shimmer — warm tone (regular speaker) */
 .subtitle-shimmer {
   background: linear-gradient(105deg,
