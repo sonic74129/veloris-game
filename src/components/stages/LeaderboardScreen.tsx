@@ -22,11 +22,14 @@ export function LeaderboardScreen() {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.play().then(() => {
-      // unmute immediately after autoplay starts (game interaction satisfies browser policy)
-      v.muted = false;
-      setVidMuted(false);
-    }).catch(() => {});
+    // Try to play with audio (works if user has interacted with the page, i.e., completed the game)
+    v.muted = false;
+    v.play().catch(() => {
+      // Browser blocked audio autoplay — fall back to muted, user can click the unmute button
+      v.muted = true;
+      setVidMuted(true);
+      v.play().catch(() => {});
+    });
   }, []);
 
   function togglePause() {
